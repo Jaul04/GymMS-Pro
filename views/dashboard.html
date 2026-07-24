@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GymMS Pro | Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- Google Font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- ChartJS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="stylesheet" href="/css/dashboard.css">
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<!-- ================= Sidebar ================= -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+
+        <i class="fa-solid fa-dumbbell"></i>
+
+        <span>GymMS Pro</span>
+
+    </div>
+
+    <ul class="menu">
+
+        <li class="active">
+
+            <a href="/dashboard">
+
+                <i class="bi bi-grid-fill"></i>
+
+                Dashboard
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="/members">
+
+                <i class="bi bi-people-fill"></i>
+
+                Members
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="/payments">
+
+                <i class="bi bi-wallet2"></i>
+
+                Payments
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="/attendance">
+
+                <i class="bi bi-calendar-check-fill"></i>
+
+                Attendance
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="#">
+
+                <i class="bi bi-person-badge-fill"></i>
+
+                Trainers
+
+            </a>
+
+        </li>
+
+        <li>
+
+            <a href="#">
+
+                <i class="bi bi-file-earmark-bar-graph-fill"></i>
+
+                Reports
+
+            </a>
+
+        </li>
+
+    </ul>
+
+    <div class="logout">
+
+    <a href="/logout">
+
+        <i class="bi bi-box-arrow-right"></i>
+
+        Logout
+
+    </a>
+
+</div>
+
+</aside>
+
+<!-- ================= Main ================= -->
+
+<div class="main">
+
+<!-- ================= Navbar ================= -->
+
+<header class="topbar">
+
+<div class="left">
+
+<h3>Dashboard</h3>
+
+<p id="greeting">
+
+Welcome Back 👋
+
+</p>
+
+</div>
+
+<div class="right">
+
+<div class="search-box">
+
+<i class="bi bi-search"></i>
+
+<input
+type="text"
+placeholder="Search..."
+>
+
+</div>
+
+<div class="clock">
+
+<i class="bi bi-clock-history"></i>
+
+<span id="liveClock">
+
+00:00:00
+
+</span>
+
+</div>
+
+<button class="icon-btn">
+
+<i class="bi bi-bell-fill"></i>
+
+</button>
+
+<div class="profile-dropdown">
+
+
+<div class="profile-box">
+
+
+<img
+id="adminImage"
+src="https://ui-avatars.com/api/?name=Admin&background=f4b400&color=000"
+>
+
+
+
+<div class="profile-info">
+
+
+<h6 id="adminName">
+Admin
+</h6>
+
+
+<small id="adminEmail">
+Administrator
+</small>
+
+
+</div>
+
+
+<i class="bi bi-chevron-down"></i>
+
+
+</div>
+
+
+
+
+
+<div class="profile-menu">
+
+
+<div class="admin-details">
+
+
+<h6 id="menuAdminName">
+Admin
+</h6>
+
+
+<small id="menuAdminEmail">
+admin@gmail.com
+</small>
+
+
+</div>
+
+
+
+<a href="/admin-profile">
+
+<i class="bi bi-person-circle"></i>
+
+Profile
+
+</a>
+
+
+
+
+<a href="/logout" class="logout-btn">
+
+<i class="bi bi-box-arrow-right"></i>
+
+Logout
+
+</a>
+
+
+
+</div>
+
+
+</div>
+
+</div>
+
+</header>
+
+<!-- ================= Welcome Banner ================= -->
+
+<section class="welcome-card">
+
+<div>
+
+<h2>
+
+Welcome Back, Admin 👋
+
+</h2>
+
+<p>
+
+Monitor members, payments and attendance from one place.
+
+</p>
+
+</div>
+
+<button class="btn btn-warning">
+
+<i class="bi bi-plus-circle"></i>
+
+Add Member
+
+</button>
+
+</section>
+
+<!-- ================= Stats ================= -->
+
+<div class="row g-4">
+
+<div class="col-lg-3">
+
+<div class="stat-card members">
+
+<div>
+
+<p>Total Members</p>
+
+<h2 id="totalMembers">
+
+0
+
+</h2>
+
+</div>
+
+<i class="bi bi-people-fill"></i>
+
+</div>
+
+</div>
+
+<div class="col-lg-3">
+
+<div class="stat-card active">
+
+<div>
+
+<p>Active Members</p>
+
+<h2 id="activeMembers">
+
+0
+
+</h2>
+
+</div>
+
+<i class="bi bi-person-check-fill"></i>
+
+</div>
+
+</div>
+
+<div class="col-lg-3">
+
+<div class="stat-card attendance">
+
+<div>
+
+<p>Today's Attendance</p>
+
+<h2 id="todayAttendance">
+
+0
+
+</h2>
+
+</div>
+
+<i class="bi bi-calendar-check-fill"></i>
+
+</div>
+
+</div>
+
+<div class="col-lg-3">
+
+<div class="stat-card revenue">
+
+<div>
+
+<p>Total Revenue</p>
+
+<h2 id="totalRevenue">
+
+₹0
+
+</h2>
+
+</div>
+
+<i class="bi bi-currency-rupee"></i>
+
+</div>
+
+</div>
+
+</div>
+<!-- ================= Charts ================= -->
+
+<div class="row mt-4">
+
+    <div class="col-lg-8 mb-4">
+
+        <div class="card dashboard-box">
+
+            <div class="card-header d-flex justify-content-between align-items-center">
+
+                <h5 class="mb-0">
+                    Revenue Overview
+                </h5>
+
+                <span class="badge bg-warning text-dark">
+                    Monthly
+                </span>
+
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="revenueChart" height="100"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-4 mb-4">
+
+        <div class="card dashboard-box">
+
+            <div class="card-header">
+
+                Attendance Overview
+
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="attendanceChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= Quick Actions ================= -->
+
+<div class="row mb-4">
+
+    <div class="col-lg-3 col-md-6 mb-3">
+
+        <a href="/members" class="quick-card">
+
+            <i class="bi bi-person-plus-fill"></i>
+
+            <span>Add Member</span>
+
+        </a>
+
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-3">
+
+        <a href="/payments" class="quick-card">
+
+            <i class="bi bi-wallet-fill"></i>
+
+            <span>Add Payment</span>
+
+        </a>
+
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-3">
+
+        <a href="/attendance" class="quick-card">
+
+            <i class="bi bi-calendar-check-fill"></i>
+
+            <span>Mark Attendance</span>
+
+        </a>
+
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-3">
+
+        <a href="#" class="quick-card">
+
+            <i class="bi bi-file-earmark-bar-graph-fill"></i>
+
+            <span>Reports</span>
+
+        </a>
+
+    </div>
+
+</div>
+
+<!-- ================= Tables ================= -->
+
+<div class="row">
+
+    <!-- Recent Members -->
+
+    <div class="col-lg-7 mb-4">
+
+        <div class="card dashboard-box">
+
+            <div class="card-header d-flex justify-content-between">
+
+                <span>Recent Members</span>
+
+                <a href="/members" class="btn btn-sm btn-warning">
+
+                    View All
+
+                </a>
+
+            </div>
+
+            <div class="card-body table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+
+                            <th>Name</th>
+
+                            <th>Plan</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="recentMembers">
+
+                        <tr>
+
+                            <td colspan="4" class="text-center">
+
+                                No Members Found
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Recent Payments -->
+
+    <div class="col-lg-5 mb-4">
+
+        <div class="card dashboard-box">
+
+            <div class="card-header">
+
+                Recent Payments
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="payment-item">
+
+                    <div>
+
+                        <h6>Rahul Sharma</h6>
+
+                        <small>Premium Plan</small>
+
+                    </div>
+
+                    <span class="badge bg-success">
+
+                        ₹2,000
+
+                    </span>
+
+                </div>
+
+                <hr>
+
+                <div class="payment-item">
+
+                    <div>
+
+                        <h6>Ansar Khan</h6>
+
+                        <small>Basic Plan</small>
+
+                    </div>
+
+                    <span class="badge bg-success">
+
+                        ₹1,500
+
+                    </span>
+
+                </div>
+
+                <hr>
+
+                <div class="payment-item">
+
+                    <div>
+
+                        <h6>Priya Patil</h6>
+
+                        <small>Gold Plan</small>
+
+                    </div>
+
+                    <span class="badge bg-success">
+
+                        ₹3,000
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ================= Floating Action Button ================= -->
+
+<a href="/members" class="fab" title="Add Member">
+
+    <i class="bi bi-plus-lg"></i>
+
+</a>
+
+<!-- ================= Footer ================= -->
+
+<footer class="footer mt-4">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+        <p class="mb-0">
+
+            © 2026 GymMS Pro. All Rights Reserved.
+
+        </p>
+
+        <p class="mb-0">
+
+            Developed by <strong>Jaul Ansar</strong>
+
+        </p>
+
+    </div>
+
+</footer>
+
+</div>
+<!-- End Main -->
+
+</div>
+<!-- End Wrapper -->
+
+<!-- Bootstrap JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Dashboard JS -->
+
+<script src="/js/dashboard.js"></script>
+
+</body>
+
+</html>
