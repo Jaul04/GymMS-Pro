@@ -1,5 +1,5 @@
 const API = "/payments";
-const RAZORPAY_KEY = "rzp_test_THIcfQCF46SWLm";
+const RAZORPAY_KEY = "rzp_live_THJJ0lbmFICoWk";
 
 let payments = [];
 let editId = null;
