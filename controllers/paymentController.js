@@ -1,428 +1,272 @@
 const Payment = require("../models/Payment");
+const Razorpay = require("razorpay");
 
-const addPayment = async(req,res)=>{
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
+const createOrder = async (req, res) => {
 
-    try{
+    try {
 
+        const { amount } = req.body;
 
-        const count =
-        await Payment.countDocuments();
+        const options = {
+            amount: Number(amount) * 100,
+            currency: "INR",
+            receipt: "receipt_" + Date.now()
+        };
 
+        const order = await razorpay.orders.create(options);
 
-
-        const payment =
-        new Payment({
-
-
-
-            paymentId:
-            "PAY" +
-            String(count + 1)
-            .padStart(3,"0"),
-
-
-
-
-            memberName:
-            req.body.memberName,
-
-
-
-            amount:
-            req.body.amount,
-
-
-
-            paymentDate:
-            req.body.paymentDate,
-
-
-
-            method:
-            req.body.method
-
-
-
+        res.json({
+            success: true,
+            order
         });
 
+    } catch (error) {
 
+        console.log("Create Order Error:", error);
 
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
 
+    }
+
+};
+
+const addPayment = async (req, res) => {
+
+    try {
+
+        const count = await Payment.countDocuments();
+
+        const payment = new Payment({
+
+            paymentId:
+                "PAY" +
+                String(count + 1).padStart(3, "0"),
+
+            memberId: req.body.memberId || null,
+
+            memberName: req.body.memberName,
+
+            amount: req.body.amount,
+
+            paymentDate: req.body.paymentDate,
+
+            method: req.body.method,
+
+            status: req.body.status || "Completed"
+
+        });
 
         await payment.save();
 
-
-
-
-
         res.status(201).json({
 
+            success: true,
 
-            success:true,
-
-
-            message:
-            "Payment Added Successfully",
-
+            message: "Payment Added Successfully",
 
             payment
 
-
         });
-
-
-
 
     }
 
+    catch (error) {
 
-    catch(error){
-
-
-        console.log(
-            "Add Payment Error:",
-            error
-        );
-
-
+        console.log("Add Payment Error:", error);
 
         res.status(500).json({
 
+            success: false,
 
-            success:false,
-
-
-            message:error.message
-
-
+            message: error.message
 
         });
-
 
     }
 
-
-
 };
 
+const getAllPayments = async (req, res) => {
 
+    try {
 
-const getAllPayments = async(req,res)=>{
-
-
-    try{
-
-
-        const payments =
-        await Payment.find()
-        .sort({
-            createdAt:-1
+        const payments = await Payment.find().sort({
+            createdAt: -1
         });
-
-
-
 
         res.json(payments);
 
-
-
     }
 
-
-    catch(error){
-
-
+    catch (error) {
 
         res.status(500).json({
 
+            success: false,
 
-            success:false,
-
-
-            message:error.message
-
+            message: error.message
 
         });
 
-
-
     }
-
 
 };
 
+const getPaymentById = async (req, res) => {
 
-const getPaymentById = async(req,res)=>{
+    try {
 
+        const payment = await Payment.findById(req.params.id);
 
-    try{
-
-
-        const payment =
-        await Payment.findById(
-            req.params.id
-        );
-
-
-
-
-        if(!payment){
-
+        if (!payment) {
 
             return res.status(404).json({
 
+                success: false,
 
-                success:false,
-
-
-                message:
-                "Payment Not Found"
-
+                message: "Payment Not Found"
 
             });
 
-
         }
-
-
-
-
 
         res.json(payment);
 
-
-
-
     }
 
-
-    catch(error){
-
-
+    catch (error) {
 
         res.status(500).json({
 
+            success: false,
 
-            success:false,
-
-
-            message:error.message
-
+            message: error.message
 
         });
 
-
-
     }
-
 
 };
 
+const updatePayment = async (req, res) => {
 
+    try {
 
-const updatePayment = async(req,res)=>{
-
-
-    try{
-
-
-        const payment =
-        await Payment.findByIdAndUpdate(
-
+        const payment = await Payment.findByIdAndUpdate(
 
             req.params.id,
 
-
             {
 
+                memberName: req.body.memberName,
 
-                memberName:
-                req.body.memberName,
+                amount: req.body.amount,
 
+                paymentDate: req.body.paymentDate,
 
+                method: req.body.method,
 
-                amount:
-                req.body.amount,
-
-
-
-                paymentDate:
-                req.body.paymentDate,
-
-
-
-                method:
-                req.body.method
-
+                status: req.body.status
 
             },
 
-
             {
-                new:true
+                new: true
             }
-
 
         );
 
-
-
-
-
-        if(!payment){
-
+        if (!payment) {
 
             return res.status(404).json({
 
+                success: false,
 
-                success:false,
-
-
-                message:
-                "Payment Not Found"
-
+                message: "Payment Not Found"
 
             });
 
-
         }
-
-
-
-
-
 
         res.json({
 
+            success: true,
 
-            success:true,
-
-
-            message:
-            "Payment Updated Successfully",
-
+            message: "Payment Updated Successfully",
 
             payment
 
-
         });
-
-
-
-
 
     }
 
-
-    catch(error){
-
-
+    catch (error) {
 
         res.status(500).json({
 
+            success: false,
 
-            success:false,
-
-
-            message:error.message
-
+            message: error.message
 
         });
 
-
-
     }
-
 
 };
 
+const deletePayment = async (req, res) => {
 
+    try {
 
-const deletePayment = async(req,res)=>{
+        const payment = await Payment.findByIdAndDelete(req.params.id);
 
-
-    try{
-
-
-        const payment =
-        await Payment.findByIdAndDelete(
-            req.params.id
-        );
-
-
-
-
-
-        if(!payment){
-
+        if (!payment) {
 
             return res.status(404).json({
 
+                success: false,
 
-                success:false,
-
-
-                message:
-                "Payment Not Found"
-
+                message: "Payment Not Found"
 
             });
 
-
         }
-
-
-
-
-
 
         res.json({
 
+            success: true,
 
-            success:true,
-
-
-            message:
-            "Payment Deleted Successfully"
-
-
+            message: "Payment Deleted Successfully"
 
         });
 
-
-
-
-
     }
 
-
-    catch(error){
-
-
+    catch (error) {
 
         res.status(500).json({
 
+            success: false,
 
-            success:false,
-
-
-            message:error.message
-
+            message: error.message
 
         });
 
-
-
     }
-
 
 };
 
-
-
 module.exports = {
 
+    createOrder,
 
     addPayment,
 
@@ -433,6 +277,5 @@ module.exports = {
     updatePayment,
 
     deletePayment
-
 
 };
