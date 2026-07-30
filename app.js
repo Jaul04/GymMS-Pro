@@ -7,137 +7,645 @@ const session = require("express-session");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 
+
+// Middleware
+
 const authMiddleware = require("./middleware/auth");
+
+
+// Model
 
 const Admin = require("./models/Admin");
 
+
+// Routes
+
 const memberRoutes = require("./routes/memberRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const paymentGatewayRoutes = require("./routes/paymentGatewayRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
+const trainerRoutes = require("./routes/trainerRoutes");
+const planRoutes = require("./routes/planRoutes");
+
+
 
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 
-app.use(express.static(path.join(__dirname, "public")));
+
+
+// Body Parser
 
 app.use(
-    session({
-        secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
+    bodyParser.urlencoded({
+        extended:true
     })
 );
 
-mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log("✅ MongoDB Connected");
+
+app.use(bodyParser.json());
+
+
+
+
+// Static Folder
+
+app.use(
+    express.static(
+        path.join(__dirname,"public")
+    )
+);
+
+
+
+
+
+// Session
+
+app.use(
+    session({
+
+        secret:process.env.SESSION_SECRET,
+
+        resave:false,
+
+        saveUninitialized:false
+
     })
-    .catch((err) => {
-        console.log("❌ MongoDB Error:", err);
-    });
+);
 
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "views", "home.html"));
+
+
+
+
+
+
+// MongoDB
+
+mongoose
+.connect(process.env.MONGO_URI)
+
+.then(()=>{
+
+    console.log("✅ MongoDB Connected");
+
+})
+
+.catch((err)=>{
+
+    console.log(
+        "❌ MongoDB Error:",
+        err
+    );
+
 });
 
-app.get("/login", (req, res) => {
-    res.sendFile(path.join(__dirname, "views", "login.html"));
+
+
+
+
+
+
+
+
+// =========================
+// PAGE ROUTES
+// =========================
+
+
+app.get("/",(req,res)=>{
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "public",
+            "views",
+            "home.html"
+        )
+    );
+
 });
 
-app.post("/login", async (req, res) => {
-    const { email, password } = req.body;
 
-    try {
-        const admin = await Admin.findOne({ email });
 
-        if (!admin) {
-            return res.json({
-                success: false,
-                message: "Invalid Email or Password",
-            });
-        }
 
-        const passwordMatch = await bcrypt.compare(password, admin.password);
 
-        if (!passwordMatch) {
-            return res.json({
-                success: false,
-                message: "Invalid Email or Password",
-            });
-        }
 
-        req.session.admin = true;
-        req.session.adminId = admin._id;
+app.get("/login",(req,res)=>{
 
-        return res.json({
-            success: true,
-            message: "Login Successful",
+    res.sendFile(
+        path.join(
+            __dirname,
+            "public",
+            "views",
+            "login.html"
+        )
+    );
+
+});
+
+
+
+
+
+
+
+app.get("/register",(req,res)=>{
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "public",
+            "views",
+            "register.html"
+        )
+    );
+
+});
+
+
+
+
+
+
+
+
+app.get("/online-payment",(req,res)=>{
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "public",
+            "views",
+            "online-payment.html"
+        )
+    );
+
+});
+
+
+
+
+
+
+
+app.get("/payment-success",(req,res)=>{
+
+
+    res.sendFile(
+
+        path.join(
+            __dirname,
+            "public",
+            "views",
+            "payment-success.html"
+        )
+
+    );
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+// =========================
+// ADMIN LOGIN
+// =========================
+
+
+app.post("/login",async(req,res)=>{
+
+
+    const {
+        email,
+        password
+    } = req.body;
+
+
+
+    try{
+
+
+        const admin =
+        await Admin.findOne({
+            email
         });
-    } catch (error) {
+
+
+
+
+        if(!admin){
+
+            return res.json({
+
+                success:false,
+
+                message:"Invalid Email or Password"
+
+            });
+
+        }
+
+
+
+
+
+        const match =
+        await bcrypt.compare(
+            password,
+            admin.password
+        );
+
+
+
+
+
+        if(!match){
+
+            return res.json({
+
+                success:false,
+
+                message:"Invalid Email or Password"
+
+            });
+
+        }
+
+
+
+
+
+        req.session.admin=true;
+
+        req.session.adminId =
+        admin._id;
+
+
+
+
+        res.json({
+
+            success:true,
+
+            message:"Login Successful"
+
+        });
+
+
+
+    }
+
+    catch(error){
+
+
         console.log(error);
 
-        return res.json({
-            success: false,
-            message: "Server Error",
+
+        res.json({
+
+            success:false,
+
+            message:"Server Error"
+
         });
+
+
     }
+
+
 });
 
-app.get("/logout", (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.log(err);
-            return res.redirect("/dashboard");
-        }
+
+
+
+
+
+
+
+
+
+
+// Logout
+
+
+app.get("/logout",(req,res)=>{
+
+
+    req.session.destroy(()=>{
 
         res.redirect("/login");
+
     });
+
+
 });
 
-app.use("/dashboard", authMiddleware);
 
-app.use("/members", authMiddleware, memberRoutes);
 
-app.use("/payments", authMiddleware, paymentRoutes);
 
-app.use("/attendance", authMiddleware, attendanceRoutes);
 
-app.use("/dashboard", authMiddleware, dashboardRoutes);
 
-app.use("/", reminderRoutes);
 
-app.get("/admin-profile", authMiddleware, async (req, res) => {
-    try {
-        const admin = await Admin.findById(req.session.adminId).select("-password");
 
-        if (!admin) {
+
+// =========================
+// API ROUTES
+// =========================
+
+
+
+// Members
+
+app.use(
+    "/members",
+    memberRoutes
+);
+
+
+
+
+
+// Payments
+
+app.use(
+    "/payments",
+    authMiddleware,
+    paymentRoutes
+);
+
+
+
+
+
+// Payment Gateway
+
+app.use(
+    "/payment",
+    paymentGatewayRoutes
+);
+
+
+
+
+
+// Attendance
+
+app.use(
+    "/attendance",
+    authMiddleware,
+    attendanceRoutes
+);
+
+
+
+
+
+// Dashboard
+
+app.use(
+    "/dashboard",
+    authMiddleware,
+    dashboardRoutes
+);
+
+
+
+
+
+
+// Trainer API
+
+app.use(
+    "/trainers",
+    trainerRoutes
+);
+
+
+
+
+
+
+
+// Plan API
+
+app.use(
+    "/plans",
+    planRoutes
+);
+
+
+
+
+
+
+
+
+// Reminder
+
+app.use(
+    "/",
+    reminderRoutes
+);
+
+
+
+
+
+
+
+
+
+
+// =========================
+// TRAINER PAGE
+// =========================
+
+
+app.get(
+"/trainer",
+authMiddleware,
+(req,res)=>{
+
+
+    res.sendFile(
+
+        path.join(
+
+            __dirname,
+
+            "public",
+
+            "views",
+
+            "trainer.html"
+
+        )
+
+    );
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+// =========================
+// PLANS PAGE
+// =========================
+
+
+app.get(
+"/plans-management",
+authMiddleware,
+(req,res)=>{
+
+
+    res.sendFile(
+
+        path.join(
+
+            __dirname,
+
+            "public",
+
+            "views",
+
+            "plans.html"
+
+        )
+
+    );
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================
+// ADMIN PROFILE
+// =========================
+
+
+app.get(
+"/admin-profile",
+authMiddleware,
+async(req,res)=>{
+
+
+    try{
+
+
+        const admin =
+
+        await Admin.findById(
+            req.session.adminId
+        )
+        .select("-password");
+
+
+
+
+
+        if(!admin){
+
             return res.json({
-                success: false,
-                message: "Admin not found",
+
+                success:false,
+
+                message:"Admin not found"
+
             });
+
         }
 
+
+
+
+
         res.json({
-            success: true,
-            admin,
+
+            success:true,
+
+            admin
+
         });
-    } catch (error) {
+
+
+
+    }
+
+    catch(error){
+
+
         console.log(error);
 
+
         res.json({
-            success: false,
-            message: "Server Error",
+
+            success:false,
+
+            message:"Server Error"
+
         });
+
+
     }
+
+
 });
 
-const PORT = process.env.PORT || 8000;
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server Running on Port ${PORT}`);
+
+
+
+
+
+
+
+
+
+
+// SERVER
+
+
+const PORT =
+process.env.PORT || 8000;
+
+
+
+app.listen(PORT,()=>{
+
+
+    console.log(
+        `🚀 Server Running on Port ${PORT}`
+    );
+
+
 });

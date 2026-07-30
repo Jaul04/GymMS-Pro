@@ -2,7 +2,6 @@ const express = require("express");
 
 const router = express.Router();
 
-
 const path = require("path");
 
 
@@ -10,11 +9,13 @@ const attendanceController =
 require("../controllers/attendanceController");
 
 
-
 console.log("✅ Attendance Routes Loaded");
 
 
-router.get("/",(req,res)=>{
+
+// Attendance Page
+
+router.get("/", (req,res)=>{
 
 
     res.sendFile(
@@ -24,6 +25,8 @@ router.get("/",(req,res)=>{
             __dirname,
 
             "..",
+
+            "public",
 
             "views",
 
@@ -37,6 +40,10 @@ router.get("/",(req,res)=>{
 });
 
 
+
+
+// Add Attendance
+
 router.post(
     "/add",
     attendanceController.addAttendance
@@ -45,6 +52,7 @@ router.post(
 
 
 
+// Get All Attendance
 
 router.get(
     "/all",
@@ -54,6 +62,7 @@ router.get(
 
 
 
+// Get Attendance By ID
 
 router.get(
     "/:id",
@@ -63,6 +72,7 @@ router.get(
 
 
 
+// Update Attendance
 
 router.put(
     "/update/:id",
@@ -72,14 +82,12 @@ router.put(
 
 
 
-
+// Delete Attendance
 
 router.delete(
     "/delete/:id",
     attendanceController.deleteAttendance
 );
-
-
 
 
 

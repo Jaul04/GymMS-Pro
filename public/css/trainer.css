@@ -1,0 +1,467 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+
+
+body{
+
+    background:#f5f6fa;
+
+}
+
+
+
+/* Layout */
+
+.wrapper{
+
+    display:flex;
+    min-height:100vh;
+
+}
+
+
+
+
+
+/* Sidebar */
+
+.sidebar{
+
+    width:260px;
+
+    background:#111827;
+
+    color:white;
+
+    min-height:100vh;
+
+    position:fixed;
+
+    left:0;
+
+    top:0;
+
+}
+
+
+
+.logo{
+
+    height:80px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:20px;
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
+
+
+
+.logo i{
+
+    color:#fbbf24;
+
+}
+
+
+
+
+
+.menu{
+
+    list-style:none;
+
+    padding:20px 0;
+
+}
+
+
+
+.menu li{
+
+    margin:8px 15px;
+
+}
+
+
+
+.menu li a{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:14px 18px;
+
+    color:#cbd5e1;
+
+    text-decoration:none;
+
+    border-radius:12px;
+
+    transition:0.3s;
+
+}
+
+
+
+.menu li a:hover,
+.menu li.active a{
+
+    background:#fbbf24;
+
+    color:#111827;
+
+}
+
+
+
+
+
+/* Main */
+
+.main{
+
+    margin-left:260px;
+
+    width:calc(100% - 260px);
+
+    padding:25px;
+
+}
+
+
+
+
+
+
+/* Topbar */
+
+.topbar{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:30px;
+
+}
+
+
+
+.topbar h2{
+
+    font-weight:700;
+
+    color:#111827;
+
+}
+
+
+
+.topbar p{
+
+    color:#6b7280;
+
+}
+
+
+
+
+
+
+/* Buttons */
+
+.btn-warning{
+
+    background:#fbbf24;
+
+    border:none;
+
+    color:#111827;
+
+    font-weight:600;
+
+    padding:12px 22px;
+
+    border-radius:12px;
+
+}
+
+
+
+
+
+/* Stat Cards */
+
+
+.stat-card{
+
+    background:white;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+    box-shadow:
+    0 8px 25px rgba(0,0,0,0.08);
+
+}
+
+
+
+.stat-card i{
+
+    height:55px;
+
+    width:55px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:#fef3c7;
+
+    color:#d97706;
+
+    border-radius:15px;
+
+    font-size:25px;
+
+}
+
+
+
+.stat-card h5{
+
+    color:#6b7280;
+
+    font-size:14px;
+
+}
+
+
+
+.stat-card h2{
+
+    margin:0;
+
+    font-weight:700;
+
+}
+
+
+
+
+
+
+
+/* Cards */
+
+.card{
+
+    border:none;
+
+    border-radius:18px;
+
+    box-shadow:
+    0 8px 25px rgba(0,0,0,0.07);
+
+}
+
+
+
+.search-card{
+
+    background:white;
+
+}
+
+
+
+.form-control{
+
+    height:45px;
+
+    border-radius:12px;
+
+}
+
+
+
+
+
+
+
+/* Table */
+
+.table-card .card-header{
+
+    background:white;
+
+    border:none;
+
+    padding:20px;
+
+}
+
+
+
+.table-card h5{
+
+    font-weight:600;
+
+}
+
+
+
+.table thead th{
+
+    background:#111827;
+
+    color:white;
+
+    padding:15px;
+
+}
+
+
+
+.table tbody td{
+
+    padding:15px;
+
+}
+
+
+
+
+
+/* Modal */
+
+.modal-content{
+
+    border-radius:20px;
+
+    border:none;
+
+}
+
+
+
+.modal-header{
+
+    background:#111827;
+
+    color:white;
+
+    border-radius:
+
+    20px 20px 0 0;
+
+}
+
+
+
+.modal-body{
+
+    padding:25px;
+
+}
+
+
+
+.modal-body label{
+
+    font-weight:500;
+
+    margin-bottom:6px;
+
+}
+
+
+
+.modal-body .form-control{
+
+    height:45px;
+
+}
+
+
+
+
+
+/* Footer */
+
+.footer{
+
+    margin-top:40px;
+
+    padding:20px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    color:#6b7280;
+
+}
+
+
+
+
+
+/* Mobile */
+
+@media(max-width:900px){
+
+
+.sidebar{
+
+    width:80px;
+
+}
+
+
+.sidebar span{
+
+    display:none;
+
+}
+
+
+.main{
+
+    margin-left:80px;
+
+    width:calc(100% - 80px);
+
+}
+
+
+}

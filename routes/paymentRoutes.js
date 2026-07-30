@@ -6,6 +6,9 @@ const paymentController = require("../controllers/paymentController");
 
 console.log("✅ Payment Routes Loaded");
 
+
+// Payments Page
+
 router.get("/", (req, res) => {
 
     res.sendFile(
@@ -15,6 +18,8 @@ router.get("/", (req, res) => {
             __dirname,
 
             "..",
+
+            "public",
 
             "views",
 
@@ -26,34 +31,53 @@ router.get("/", (req, res) => {
 
 });
 
+
+// Create Razorpay Order
+
 router.post(
     "/create-order",
     paymentController.createOrder
 );
+
+
+// Add Payment
 
 router.post(
     "/add",
     paymentController.addPayment
 );
 
+
+// Get All Payments
+
 router.get(
     "/all",
     paymentController.getAllPayments
 );
+
+
+// Get Payment By ID
 
 router.get(
     "/:id",
     paymentController.getPaymentById
 );
 
+
+// Update Payment
+
 router.put(
     "/update/:id",
     paymentController.updatePayment
 );
 
+
+// Delete Payment
+
 router.delete(
     "/delete/:id",
     paymentController.deletePayment
 );
+
 
 module.exports = router;

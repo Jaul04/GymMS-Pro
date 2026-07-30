@@ -3,71 +3,122 @@ const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema({
 
+
     paymentId:{
 
+
         type:String,
+
         unique:true
 
+
     },
+
 
 
     memberId:{
 
+
         type:mongoose.Schema.Types.ObjectId,
+
         ref:"Member"
 
+
     },
+
 
 
     memberName:{
 
+
         type:String,
+
         required:true
 
+
     },
+
 
 
     amount:{
 
+
         type:Number,
+
         required:true
 
+
     },
+
 
 
     paymentDate:{
 
+
         type:Date,
+
         required:true
 
+
     },
+
 
 
     method:{
 
+
         type:String,
 
+
         enum:[
+
             "Cash",
+
             "UPI",
-            "Card"
+
+            "Card",
+
+            "Razorpay"
+
         ],
 
+
         default:"Cash"
+
 
     },
 
 
+
+    transactionId:{
+
+
+        type:String
+
+
+    },
+
+
+
     status:{
+
 
         type:String,
 
+
         enum:[
+
             "Completed",
-            "Pending"
+
+            "Pending",
+
+            "Failed"
+
         ],
 
+
         default:"Completed"
+
 
     }
 
@@ -81,8 +132,13 @@ const paymentSchema = new mongoose.Schema({
 
 
 
+
 module.exports =
+
 mongoose.model(
+
     "Payment",
+
     paymentSchema
+
 );

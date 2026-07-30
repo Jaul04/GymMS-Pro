@@ -1,0 +1,278 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+
+body{
+
+    background:#f5f7fb;
+
+}
+
+
+
+.wrapper{
+
+    display:flex;
+    min-height:100vh;
+
+}
+
+
+
+/* Sidebar */
+
+.sidebar{
+
+    width:260px;
+    background:#111827;
+    color:white;
+    padding:25px 15px;
+
+}
+
+
+
+.logo{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:22px;
+    font-weight:600;
+    margin-bottom:35px;
+
+}
+
+
+.logo i{
+
+    color:#fbbf24;
+
+}
+
+
+
+.menu{
+
+    list-style:none;
+    padding:0;
+
+}
+
+
+
+.menu li{
+
+    margin-bottom:10px;
+
+}
+
+
+
+.menu a{
+
+    text-decoration:none;
+    color:#cbd5e1;
+    display:flex;
+    gap:15px;
+    align-items:center;
+    padding:13px 15px;
+    border-radius:10px;
+    transition:0.3s;
+
+}
+
+
+
+.menu a:hover,
+.menu .active a{
+
+    background:#fbbf24;
+    color:#111827;
+
+}
+
+
+
+
+
+
+/* Main */
+
+
+.main{
+
+    flex:1;
+    padding:25px;
+
+}
+
+
+
+
+.topbar{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+
+}
+
+
+.topbar h2{
+
+    font-weight:700;
+
+}
+
+
+.topbar p{
+
+    color:#6b7280;
+
+}
+
+
+
+
+
+/* Stats */
+
+
+.stat-card{
+
+    background:white;
+    padding:25px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+
+}
+
+
+
+.stat-card i{
+
+    font-size:35px;
+    color:#f59e0b;
+
+}
+
+
+
+.stat-card h5{
+
+    color:#6b7280;
+    font-size:15px;
+
+}
+
+
+
+.stat-card h2{
+
+    font-weight:700;
+
+}
+
+
+
+
+
+
+/* Table */
+
+
+.table-card{
+
+    border:none;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+
+}
+
+
+
+.card-header{
+
+    background:white;
+    padding:20px;
+
+}
+
+
+
+.table th{
+
+    background:#111827;
+    color:white;
+
+}
+
+
+
+.table td{
+
+    vertical-align:middle;
+
+}
+
+
+
+
+
+
+
+/* Modal */
+
+
+.modal-content{
+
+    border-radius:18px;
+
+}
+
+
+.modal-header{
+
+    background:#111827;
+    color:white;
+
+}
+
+
+
+.modal-header .btn-close{
+
+    filter:invert(1);
+
+}
+
+
+
+
+
+.btn-warning{
+
+    background:#fbbf24;
+    border:none;
+    color:#111827;
+    font-weight:600;
+
+}
+
+
+
+.btn-warning:hover{
+
+    background:#f59e0b;
+
+}

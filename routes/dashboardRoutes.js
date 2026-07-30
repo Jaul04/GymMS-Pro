@@ -13,6 +13,9 @@ require("../controllers/dashboardController");
 console.log("✅ Dashboard Routes Loaded");
 
 
+
+// Dashboard Page
+
 router.get("/",(req,res)=>{
 
 
@@ -23,6 +26,8 @@ router.get("/",(req,res)=>{
             __dirname,
 
             "..",
+
+            "public",
 
             "views",
 
@@ -35,6 +40,11 @@ router.get("/",(req,res)=>{
 
 });
 
+
+
+
+// Dashboard Stats API
+
 router.get(
 
     "/stats",
@@ -42,6 +52,11 @@ router.get(
     dashboardController.getDashboardStats
 
 );
+
+
+
+
+// Recent Members
 
 router.get(
 
@@ -52,6 +67,10 @@ router.get(
 );
 
 
+
+
+// Recent Payments
+
 router.get(
 
     "/recent-payments",
@@ -61,6 +80,10 @@ router.get(
 );
 
 
+
+
+// Charts Data
+
 router.get(
 
     "/charts",
@@ -68,11 +91,6 @@ router.get(
     dashboardController.getChartData
 
 );
-
-
-
-
-
 
 
 

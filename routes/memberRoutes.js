@@ -5,21 +5,77 @@ const path = require("path");
 const memberController = require("../controllers/memberController");
 
 
+// Members Page
+
 router.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "views", "members.html"));
+
+    res.sendFile(
+        path.join(
+            __dirname,
+            "..",
+            "public",
+            "views",
+            "members.html"
+        )
+    );
+
 });
 
 
-router.post("/add", memberController.addMember);
+// Add Member
 
-router.get("/all", memberController.getAllMembers);
+router.post(
+    "/add",
+    memberController.addMember
+);
 
-router.get("/stats/dashboard", memberController.memberStats);
 
-router.get("/:id", memberController.getMemberById);
+// Get All Members
 
-router.put("/update/:id", memberController.updateMember);
+router.get(
+    "/all",
+    memberController.getAllMembers
+);
 
-router.delete("/delete/:id", memberController.deleteMember);
+
+// Dashboard Member Stats
+
+router.get(
+    "/stats/dashboard",
+    memberController.memberStats
+);
+
+
+// Get Single Member
+
+router.get(
+    "/:id",
+    memberController.getMemberById
+);
+
+
+// Update Member
+
+router.put(
+    "/update/:id",
+    memberController.updateMember
+);
+
+
+// Delete Member
+
+router.delete(
+    "/delete/:id",
+    memberController.deleteMember
+);
+
+
+// Online Registration
+
+router.post(
+    "/register",
+    memberController.registerMember
+);
+
 
 module.exports = router;
