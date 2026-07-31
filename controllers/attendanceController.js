@@ -1,44 +1,34 @@
 const Attendance = require("../models/Attendance");
 
+// ============================
+// ADD ATTENDANCE
+// ============================
+
 const addAttendance = async (req, res) => {
 
     try {
 
-        const existingAttendance = await Attendance.findOne({
+        const last = await Attendance.findOne().sort({ createdAt: -1 });
 
-            memberName: req.body.memberName,
+        let attendanceId = "ATT001";
 
-            attendanceDate: {
+        if (last && last.attendanceId) {
 
-                $gte: new Date(new Date(req.body.attendanceDate).setHours(0, 0, 0, 0)),
+            const number = parseInt(
+                last.attendanceId.replace("ATT", "")
+            );
 
-                $lt: new Date(new Date(req.body.attendanceDate).setHours(23, 59, 59, 999))
-
-            }
-
-        });
-
-        if (existingAttendance) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message: "Attendance already marked for today"
-
-            });
+            attendanceId =
+                "ATT" +
+                String(number + 1).padStart(3, "0");
 
         }
 
-        const count = await Attendance.countDocuments();
-
         const attendance = new Attendance({
 
-            attendanceId:
+            attendanceId,
 
-                "ATT" +
-
-                String(count + 1).padStart(3, "0"),
+            memberId: req.body.memberId,
 
             memberName: req.body.memberName,
 
@@ -66,55 +56,68 @@ const addAttendance = async (req, res) => {
 
     }
 
-    catch (error) {
+    catch (err) {
 
-        console.log("Add Attendance Error:", error);
+        console.log(err);
 
         res.status(500).json({
 
             success: false,
 
-            message: error.message
+            message: err.message
 
         });
 
     }
 
 };
+
+// ============================
+// GET ALL ATTENDANCE
+// ============================
 
 const getAllAttendance = async (req, res) => {
 
     try {
 
-        const attendance = await Attendance.find().sort({
+        const attendance = await Attendance.find()
 
-            createdAt: -1
+            .sort({ attendanceDate: -1 });
+
+        res.json({
+
+            success: true,
+
+            attendance
 
         });
 
-        res.json(attendance);
-
     }
 
-    catch (error) {
+    catch (err) {
 
         res.status(500).json({
 
             success: false,
 
-            message: error.message
+            message: err.message
 
         });
 
     }
 
 };
+
+// ============================
+// GET SINGLE ATTENDANCE
+// ============================
 
 const getAttendanceById = async (req, res) => {
 
     try {
 
-        const attendance = await Attendance.findById(req.params.id);
+        const attendance =
+            await Attendance.findById(req.params.id);
 
         if (!attendance) {
 
@@ -128,17 +131,23 @@ const getAttendanceById = async (req, res) => {
 
         }
 
-        res.json(attendance);
+        res.json({
+
+            success: true,
+
+            attendance
+
+        });
 
     }
 
-    catch (error) {
+    catch (err) {
 
         res.status(500).json({
 
             success: false,
 
-            message: error.message
+            message: err.message
 
         });
 
@@ -146,47 +155,28 @@ const getAttendanceById = async (req, res) => {
 
 };
 
+// ============================
+// UPDATE ATTENDANCE
+// ============================
+
 const updateAttendance = async (req, res) => {
 
     try {
 
-        const attendance = await Attendance.findByIdAndUpdate(
+        const attendance =
+            await Attendance.findByIdAndUpdate(
 
-            req.params.id,
+                req.params.id,
 
-            {
+                req.body,
 
-                memberName: req.body.memberName,
+                {
 
-                attendanceDate: req.body.attendanceDate,
+                    new: true
 
-                checkIn: req.body.checkIn,
+                }
 
-                checkOut: req.body.checkOut,
-
-                status: req.body.status
-
-            },
-
-            {
-
-                new: true
-
-            }
-
-        );
-
-        if (!attendance) {
-
-            return res.status(404).json({
-
-                success: false,
-
-                message: "Attendance Not Found"
-
-            });
-
-        }
+            );
 
         res.json({
 
@@ -200,13 +190,13 @@ const updateAttendance = async (req, res) => {
 
     }
 
-    catch (error) {
+    catch (err) {
 
         res.status(500).json({
 
             success: false,
 
-            message: error.message
+            message: err.message
 
         });
 
@@ -214,23 +204,15 @@ const updateAttendance = async (req, res) => {
 
 };
 
+// ============================
+// DELETE ATTENDANCE
+// ============================
+
 const deleteAttendance = async (req, res) => {
 
     try {
 
-        const attendance = await Attendance.findByIdAndDelete(req.params.id);
-
-        if (!attendance) {
-
-            return res.status(404).json({
-
-                success: false,
-
-                message: "Attendance Not Found"
-
-            });
-
-        }
+        await Attendance.findByIdAndDelete(req.params.id);
 
         res.json({
 
@@ -242,13 +224,66 @@ const deleteAttendance = async (req, res) => {
 
     }
 
-    catch (error) {
+    catch (err) {
 
         res.status(500).json({
 
             success: false,
 
-            message: error.message
+            message: err.message
+
+        });
+
+    }
+
+};
+
+// ============================
+// DASHBOARD STATS
+// ============================
+
+const attendanceStats = async (req, res) => {
+
+    try {
+
+        const total =
+            await Attendance.countDocuments();
+
+        const present =
+            await Attendance.countDocuments({
+
+                status: "Present"
+
+            });
+
+        const absent =
+            await Attendance.countDocuments({
+
+                status: "Absent"
+
+            });
+
+        res.json({
+
+            success: true,
+
+            total,
+
+            present,
+
+            absent
+
+        });
+
+    }
+
+    catch (err) {
+
+        res.status(500).json({
+
+            success: false,
+
+            message: err.message
 
         });
 
@@ -266,6 +301,8 @@ module.exports = {
 
     updateAttendance,
 
-    deleteAttendance
+    deleteAttendance,
+
+    attendanceStats
 
 };

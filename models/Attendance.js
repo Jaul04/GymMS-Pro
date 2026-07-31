@@ -6,7 +6,21 @@ const attendanceSchema = new mongoose.Schema({
     attendanceId:{
 
         type:String,
-        unique:true
+
+        unique:true,
+
+        required:true
+
+    },
+
+
+    memberId:{
+
+        type:mongoose.Schema.Types.ObjectId,
+
+        ref:"Member",
+
+        required:true
 
     },
 
@@ -14,6 +28,7 @@ const attendanceSchema = new mongoose.Schema({
     memberName:{
 
         type:String,
+
         required:true
 
     },
@@ -22,7 +37,10 @@ const attendanceSchema = new mongoose.Schema({
     attendanceDate:{
 
         type:Date,
-        required:true
+
+        required:true,
+
+        default:Date.now
 
     },
 
@@ -30,6 +48,7 @@ const attendanceSchema = new mongoose.Schema({
     checkIn:{
 
         type:String,
+
         default:"-"
 
     },
@@ -38,6 +57,7 @@ const attendanceSchema = new mongoose.Schema({
     checkOut:{
 
         type:String,
+
         default:"-"
 
     },
@@ -48,8 +68,11 @@ const attendanceSchema = new mongoose.Schema({
         type:String,
 
         enum:[
+
             "Present",
+
             "Absent"
+
         ],
 
         default:"Present"

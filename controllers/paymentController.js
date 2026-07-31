@@ -6,6 +6,11 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+
+// ===============================
+// CREATE RAZORPAY ORDER
+// ===============================
+
 const createOrder = async (req, res) => {
 
     try {
@@ -13,30 +18,48 @@ const createOrder = async (req, res) => {
         const { amount } = req.body;
 
         const options = {
+
             amount: Number(amount) * 100,
+
             currency: "INR",
+
             receipt: "receipt_" + Date.now()
+
         };
 
         const order = await razorpay.orders.create(options);
 
         res.json({
+
             success: true,
+
             order
+
         });
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.log("Create Order Error:", error);
 
         res.status(500).json({
+
             success: false,
+
             message: error.message
+
         });
 
     }
 
 };
+
+
+
+// ===============================
+// ADD PAYMENT
+// ===============================
 
 const addPayment = async (req, res) => {
 
@@ -50,17 +73,35 @@ const addPayment = async (req, res) => {
                 "PAY" +
                 String(count + 1).padStart(3, "0"),
 
-            memberId: req.body.memberId || null,
+            memberId:
+                req.body.memberId || null,
 
-            memberName: req.body.memberName,
+            memberName:
+                req.body.memberName,
 
-            amount: req.body.amount,
+            memberEmail:
+                req.body.memberEmail,
 
-            paymentDate: req.body.paymentDate,
+            memberPhone:
+                req.body.memberPhone,
 
-            method: req.body.method,
+            plan:
+                req.body.plan,
 
-            status: req.body.status || "Completed"
+            amount:
+                req.body.amount,
+
+            paymentDate:
+                req.body.paymentDate,
+
+            method:
+                req.body.method,
+
+            transactionId:
+                req.body.transactionId,
+
+            status:
+                req.body.status || "Completed"
 
         });
 
@@ -94,15 +135,31 @@ const addPayment = async (req, res) => {
 
 };
 
+
+
+// ===============================
+// GET ALL PAYMENTS
+// ===============================
+
 const getAllPayments = async (req, res) => {
 
     try {
 
-        const payments = await Payment.find().sort({
-            createdAt: -1
-        });
+        const payments = await Payment.find()
 
-        res.json(payments);
+            .sort({
+
+                createdAt: -1
+
+            });
+
+        res.json({
+
+            success: true,
+
+            payments
+
+        });
 
     }
 
@@ -120,11 +177,21 @@ const getAllPayments = async (req, res) => {
 
 };
 
+
+
+// ===============================
+// GET PAYMENT BY ID
+// ===============================
+
 const getPaymentById = async (req, res) => {
 
     try {
 
-        const payment = await Payment.findById(req.params.id);
+        const payment = await Payment.findById(
+
+            req.params.id
+
+        );
 
         if (!payment) {
 
@@ -138,7 +205,13 @@ const getPaymentById = async (req, res) => {
 
         }
 
-        res.json(payment);
+        res.json({
+
+            success: true,
+
+            payment
+
+        });
 
     }
 
@@ -156,6 +229,12 @@ const getPaymentById = async (req, res) => {
 
 };
 
+
+
+// ===============================
+// UPDATE PAYMENT
+// ===============================
+
 const updatePayment = async (req, res) => {
 
     try {
@@ -166,20 +245,39 @@ const updatePayment = async (req, res) => {
 
             {
 
-                memberName: req.body.memberName,
+                memberName:
+                    req.body.memberName,
 
-                amount: req.body.amount,
+                memberEmail:
+                    req.body.memberEmail,
 
-                paymentDate: req.body.paymentDate,
+                memberPhone:
+                    req.body.memberPhone,
 
-                method: req.body.method,
+                plan:
+                    req.body.plan,
 
-                status: req.body.status
+                amount:
+                    req.body.amount,
+
+                paymentDate:
+                    req.body.paymentDate,
+
+                method:
+                    req.body.method,
+
+                transactionId:
+                    req.body.transactionId,
+
+                status:
+                    req.body.status
 
             },
 
             {
+
                 new: true
+
             }
 
         );
@@ -222,11 +320,21 @@ const updatePayment = async (req, res) => {
 
 };
 
+
+
+// ===============================
+// DELETE PAYMENT
+// ===============================
+
 const deletePayment = async (req, res) => {
 
     try {
 
-        const payment = await Payment.findByIdAndDelete(req.params.id);
+        const payment = await Payment.findByIdAndDelete(
+
+            req.params.id
+
+        );
 
         if (!payment) {
 

@@ -689,3 +689,30 @@ body{
 
 
 }
+
+/* ============================
+   Attendance Chart Fix
+============================ */
+
+.analytics-card {
+
+    height: 420px;
+    overflow: hidden;
+
+}
+
+
+#attendanceChart {
+
+    max-height: 350px !important;
+
+}
+
+
+.chart-container {
+
+    height: 350px;
+    width: 350px;
+    margin: auto;
+
+}

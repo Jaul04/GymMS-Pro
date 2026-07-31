@@ -1,297 +1,147 @@
-// GymMS Pro Online Payment JS
-
-
 document.addEventListener("DOMContentLoaded", () => {
 
+    const memberData = JSON.parse(localStorage.getItem("gymMember"));
 
-    const memberData = JSON.parse(
-        localStorage.getItem("gymMember")
-    );
-
-
-    if(!memberData){
-
+    if (!memberData) {
         alert("Registration data not found.");
-
-        window.location.href="/register";
-
+        window.location.href = "/register";
         return;
-
     }
 
+    // ===========================
+    // Show Member Details
+    // ===========================
 
+    document.getElementById("name").innerText = memberData.name;
+    document.getElementById("email").innerText = memberData.email;
+    document.getElementById("plan").innerText = memberData.plan;
+    document.getElementById("amount").innerText = "₹" + memberData.amount;
 
-    // Display Member Data
+    const amount = Number(memberData.amount);
 
-    document.getElementById("name").innerText =
-        memberData.name;
+    // ===========================
+    // Pay Button
+    // ===========================
 
+    document.getElementById("payButton").addEventListener("click", function () {
 
-    document.getElementById("email").innerText =
-        memberData.email;
+        const options = {
 
+            key: "rzp_live_THJJ0lbmFICoWk",
 
-    document.getElementById("phone").innerText =
-        memberData.phone;
+            amount: amount * 100,
 
+            currency: "INR",
 
-    document.getElementById("plan").innerText =
-        memberData.plan;
+            name: "GymMS Pro",
 
+            description: "Gym Membership Payment",
 
+            handler: async function (response) {
 
-    let amount = 0;
+                try {
 
+                    const payment = {
 
+                        memberName: memberData.name,
 
-    // Plan Amount
+                        memberEmail: memberData.email,
 
-    if(memberData.plan === "Monthly"){
+                        memberPhone: memberData.phone,
 
-        amount = 999;
+                        memberId: memberData._id,
 
-    }
+                        amount: amount,
 
-    else if(memberData.plan === "Quarterly"){
+                        paymentDate: new Date(),
 
-        amount = 2500;
+                        method: "Razorpay",
 
-    }
+                        status: "Completed",
 
-    else if(memberData.plan === "Half-Yearly"){
+                        transactionId: response.razorpay_payment_id
 
-        amount = 5000;
+                    };
 
-    }
+                    const save = await fetch("/payments/add", {
 
-    else if(memberData.plan === "Yearly"){
+                        method: "POST",
 
-        amount = 9000;
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
 
-    }
+                        body: JSON.stringify(payment)
 
+                    });
 
+                    const result = await save.json();
 
-    document.getElementById("amount").innerText =
-        "₹" + amount;
+                    if (!result.success) {
+                        alert(result.message);
+                        return;
+                    }
 
+                    localStorage.setItem("paymentData", JSON.stringify({
 
+                        name: memberData.name,
 
-    // Payment Button
+                        email: memberData.email,
 
+                        phone: memberData.phone,
 
-    document
-    .getElementById("payBtn")
-    .onclick = function(){
+                        plan: memberData.plan,
 
+                        amount: amount,
 
+                        paymentId: response.razorpay_payment_id,
 
-        let options = {
+                        paymentMethod: "Razorpay",
 
+                        joinDate: memberData.joinDate,
 
-            key:
-            "YOUR_RAZORPAY_KEY",
+                        expiryDate: memberData.expiryDate
 
+                    }));
 
-            amount:
-            amount * 100,
+                    alert("Payment Successful");
 
+                    window.location.href = "/payment-success";
 
-            currency:
-            "INR",
+                }
 
+                catch (err) {
 
-            name:
-            "GymMS Pro",
+                    console.log(err);
 
+                    alert("Payment Save Failed");
 
-            description:
-            "Gym Membership Payment",
-
-
-
-            handler:
-            function(response){
-
-
-                verifyPayment(
-                    response,
-                    memberData,
-                    amount
-                );
-
+                }
 
             },
 
+            prefill: {
 
-            prefill:{
+                name: memberData.name,
 
+                email: memberData.email,
 
-                name:
-                memberData.name,
-
-
-                email:
-                memberData.email,
-
-
-                contact:
-                memberData.phone
-
+                contact: memberData.phone
 
             },
 
+            theme: {
 
-            theme:{
-
-
-                color:
-                "#0d6efd"
-
+                color: "#ffc107"
 
             }
 
-
         };
 
-
-
-        let rzp =
-        new Razorpay(options);
-
-
+        const rzp = new Razorpay(options);
 
         rzp.open();
 
-
-    };
-
-
+    });
 
 });
-
-
-
-
-// VERIFY PAYMENT FUNCTION
-
-
-function verifyPayment(
-    paymentResponse,
-    memberData,
-    amount
-){
-
-
-
-    let today = new Date();
-
-
-
-    let joinDateFormat =
-    today.toISOString()
-    .split("T")[0];
-
-
-
-    let expiry =
-    new Date(today);
-
-
-
-    expiry.setMonth(
-        expiry.getMonth()+1
-    );
-
-
-
-    let expiryDateFormat =
-    expiry.toISOString()
-    .split("T")[0];
-
-
-
-
-
-    const paymentData = {
-
-
-
-        name:
-        memberData.name,
-
-
-
-        email:
-        memberData.email,
-
-
-
-        phone:
-        memberData.phone,
-
-
-
-        plan:
-        memberData.plan,
-
-
-
-        amount:
-        amount,
-
-
-
-        paymentId:
-        paymentResponse.razorpay_payment_id,
-
-
-
-        paymentMethod:
-        "Razorpay",
-
-
-
-        joinDate:
-        joinDateFormat,
-
-
-
-        expiryDate:
-        expiryDateFormat
-
-
-
-    };
-
-
-
-
-
-    console.log(
-        "FINAL RECEIPT DATA:",
-        paymentData
-    );
-
-
-
-
-
-    localStorage.setItem(
-
-        "paymentData",
-
-        JSON.stringify(paymentData)
-
-    );
-
-
-
-
-
-    window.location.href =
-    "/payment-success";
-
-
-
-}

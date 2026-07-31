@@ -173,11 +173,10 @@ registerForm.addEventListener("submit", async (e) => {
 
             // Save data for payment page
 
-            localStorage.setItem(
-                "gymMember",
-                JSON.stringify(member)
-            );
-
+           localStorage.setItem(
+    "gymMember",
+    JSON.stringify(data.member)
+);
             alert("Registration Successful!");
 
             // Redirect to payment page

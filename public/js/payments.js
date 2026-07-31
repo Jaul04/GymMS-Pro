@@ -14,29 +14,46 @@ const todayRevenue = document.getElementById("todayRevenue");
 const paymentCount = document.getElementById("paymentCount");
 const upiCount = document.getElementById("upiCount");
 
-const searchPayment = document.getElementById("searchPayment");
-const paymentFilter = document.getElementById("paymentFilter");
-
 window.addEventListener("DOMContentLoaded", () => {
 
-    loadPayments();
+    document.getElementById("paymentDate").value =
+        new Date().toISOString().split("T")[0];
+
     loadMembers();
+    loadPayments();
 
 });
 
-async function loadPayments() {
+
+// ===============================
+// LOAD MEMBERS
+// ===============================
+
+async function loadMembers() {
 
     try {
 
-        const res = await fetch(`${API}/all`);
+        const res = await fetch("/members/all");
+        const data = await res.json();
 
-        payments = await res.json();
+        console.log(data);
 
-        displayPayments(payments);
+        memberSelect.innerHTML =
+        `<option value="">Select Member</option>`;
 
-        updateStats(payments);
+        if (!data.success) return;
 
-        createRevenueChart();
+        data.members.forEach(member => {
+
+            memberSelect.innerHTML += `
+
+                <option value="${member.name}">
+                    ${member.name}
+                </option>
+
+            `;
+
+        });
 
     }
 
@@ -48,6 +65,43 @@ async function loadPayments() {
 
 }
 
+
+// ===============================
+// LOAD PAYMENTS
+// ===============================
+
+async function loadPayments() {
+
+    try {
+
+        const res = await fetch(`${API}/all`);
+
+        const data = await res.json();
+
+        if (data.success)
+            payments = data.payments;
+        else
+            payments = [];
+
+        displayPayments(payments);
+
+        updateStats(payments);
+
+    }
+
+    catch (err) {
+
+        console.log(err);
+
+    }
+
+}
+
+
+// ===============================
+// DISPLAY TABLE
+// ===============================
+
 function displayPayments(data) {
 
     paymentTable.innerHTML = "";
@@ -55,11 +109,17 @@ function displayPayments(data) {
     if (data.length === 0) {
 
         paymentTable.innerHTML = `
+
         <tr>
-            <td colspan="6" class="text-center">
-                No Payments Available
-            </td>
+
+        <td colspan="6" class="text-center">
+
+        No Payments Available
+
+        </td>
+
         </tr>
+
         `;
 
         return;
@@ -80,61 +140,47 @@ function displayPayments(data) {
 
         <tr>
 
-            <td>#${index + 1}</td>
+        <td>#${index + 1}</td>
 
-            <td>
+        <td>${payment.memberName}</td>
 
-                <div class="d-flex align-items-center">
+        <td>₹${payment.amount}</td>
 
-                    <div class="member-avatar">
+        <td>
 
-                        ${payment.memberName.charAt(0).toUpperCase()}
+        ${new Date(payment.paymentDate).toLocaleDateString("en-IN")}
 
-                    </div>
+        </td>
 
-                    ${payment.memberName}
+        <td>
 
-                </div>
+        <span class="${badge}">
 
-            </td>
+        ${payment.method}
 
-            <td>₹${payment.amount}</td>
+        </span>
 
-            <td>
+        </td>
 
-                ${new Date(payment.paymentDate).toLocaleDateString("en-IN")}
+        <td>
 
-            </td>
+        <button
+        class="btn btn-sm btn-primary"
+        onclick="editPayment('${payment._id}')">
 
-            <td>
+        Edit
 
-                <span class="method-badge ${badge}">
+        </button>
 
-                    ${payment.method}
+        <button
+        class="btn btn-sm btn-danger"
+        onclick="deletePayment('${payment._id}')">
 
-                </span>
+        Delete
 
-            </td>
+        </button>
 
-            <td>
-
-                <button
-                    class="action-btn edit-btn"
-                    onclick="editPayment('${payment._id}')">
-
-                    <i class="fa fa-edit"></i>
-
-                </button>
-
-                <button
-                    class="action-btn delete-btn"
-                    onclick="deletePayment('${payment._id}')">
-
-                    <i class="fa fa-trash"></i>
-
-                </button>
-
-            </td>
+        </td>
 
         </tr>
 
@@ -144,13 +190,19 @@ function displayPayments(data) {
 
 }
 
+
+// ===============================
+// STATS
+// ===============================
+
 function updateStats(data) {
 
     let total = 0;
     let today = 0;
     let upi = 0;
 
-    const todayDate = new Date().toISOString().split("T")[0];
+    const todayDate =
+        new Date().toISOString().split("T")[0];
 
     data.forEach(payment => {
 
@@ -159,7 +211,8 @@ function updateStats(data) {
         if (payment.method === "UPI")
             upi++;
 
-        const date = new Date(payment.paymentDate)
+        const date =
+            new Date(payment.paymentDate)
             .toISOString()
             .split("T")[0];
 
@@ -174,117 +227,47 @@ function updateStats(data) {
     upiCount.innerText = upi;
 
 }
+
+
+// ===============================
+// SAVE PAYMENT
+// ===============================
+
 paymentForm.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
     const payment = {
 
-        memberName: document.getElementById("memberName").value,
+        memberName: memberSelect.value,
 
         amount: document.getElementById("amount").value,
 
-        paymentDate: document.getElementById("paymentDate").value,
+        paymentDate:
+        document.getElementById("paymentDate").value,
 
-        method: document.getElementById("paymentMethod").value,
+        method:
+        document.getElementById("paymentMethod").value,
 
         status: "Completed"
 
     };
 
+    let url = `${API}/add`;
+    let method = "POST";
+
     if (editId) {
 
-        try {
-
-            const res = await fetch(`${API}/update/${editId}`, {
-
-                method: "PUT",
-
-                headers: {
-
-                    "Content-Type": "application/json"
-
-                },
-
-                body: JSON.stringify(payment)
-
-            });
-
-            if (res.ok) {
-
-                alert("Payment Updated Successfully");
-
-                bootstrap.Modal.getInstance(
-                    document.getElementById("paymentModal")
-                ).hide();
-
-                resetPaymentForm();
-
-                loadPayments();
-
-            }
-
-        }
-
-        catch (err) {
-
-            console.log(err);
-
-        }
-
-        return;
-
-    }
-
-    if (payment.method === "Cash") {
-
-        try {
-
-            const res = await fetch(`${API}/add`, {
-
-                method: "POST",
-
-                headers: {
-
-                    "Content-Type": "application/json"
-
-                },
-
-                body: JSON.stringify(payment)
-
-            });
-
-            if (res.ok) {
-
-                alert("Cash Payment Added Successfully");
-
-                bootstrap.Modal.getInstance(
-                    document.getElementById("paymentModal")
-                ).hide();
-
-                resetPaymentForm();
-
-                loadPayments();
-
-            }
-
-        }
-
-        catch (err) {
-
-            console.log(err);
-
-        }
-
-        return;
+        url = `${API}/update/${editId}`;
+        method = "PUT";
 
     }
 
     try {
 
-        const orderResponse = await fetch(`${API}/create-order`, {
+        const res = await fetch(url, {
 
-            method: "POST",
+            method,
 
             headers: {
 
@@ -292,91 +275,29 @@ paymentForm.addEventListener("submit", async (e) => {
 
             },
 
-            body: JSON.stringify({
-
-                amount: payment.amount
-
-            })
+            body: JSON.stringify(payment)
 
         });
 
-        const data = await orderResponse.json();
+        const data = await res.json();
 
-        if (!data.success) {
+        alert(data.message);
 
-            alert("Unable to create Razorpay order");
+        if (data.success) {
 
-            return;
+            bootstrap.Modal
+            .getInstance(
+                document.getElementById("paymentModal")
+            )
+            .hide();
+
+            paymentForm.reset();
+
+            editId = null;
+
+            loadPayments();
 
         }
-
-        const options = {
-
-            key: RAZORPAY_KEY,
-
-            amount: data.order.amount,
-
-            currency: data.order.currency,
-
-            name: "GymMS Pro",
-
-            description: "Gym Membership Payment",
-
-            order_id: data.order.id,
-
-            handler: async function (response) {
-
-                payment.razorpayPaymentId = response.razorpay_payment_id;
-                payment.razorpayOrderId = response.razorpay_order_id;
-                payment.status = "Completed";
-
-                const save = await fetch(`${API}/add`, {
-
-                    method: "POST",
-
-                    headers: {
-
-                        "Content-Type": "application/json"
-
-                    },
-
-                    body: JSON.stringify(payment)
-
-                });
-
-                if (save.ok) {
-
-                    alert("Payment Successful");
-
-                    bootstrap.Modal.getInstance(
-                        document.getElementById("paymentModal")
-                    ).hide();
-
-                    resetPaymentForm();
-
-                    loadPayments();
-
-                }
-
-            },
-
-            prefill: {
-
-                name: payment.memberName
-
-            },
-
-            theme: {
-
-                color: "#0d6efd"
-
-            }
-
-        };
-
-        const rzp = new Razorpay(options);
-
-        rzp.open();
 
     }
 
@@ -384,11 +305,14 @@ paymentForm.addEventListener("submit", async (e) => {
 
         console.log(err);
 
-        alert("Payment Failed");
-
     }
 
 });
+
+
+// ===============================
+// EDIT PAYMENT
+// ===============================
 
 async function editPayment(id) {
 
@@ -398,16 +322,18 @@ async function editPayment(id) {
 
     editId = id;
 
-    document.getElementById("memberName").value = payment.memberName;
-    document.getElementById("amount").value = payment.amount;
-    document.getElementById("paymentDate").value =
-        new Date(payment.paymentDate).toISOString().split("T")[0];
-    document.getElementById("paymentMethod").value = payment.method;
+    memberSelect.value = payment.memberName;
 
-    document.querySelector(".modal-header h4").innerHTML = `
-        <i class="fa fa-edit"></i>
-        Edit Payment
-    `;
+    document.getElementById("amount").value =
+    payment.amount;
+
+    document.getElementById("paymentDate").value =
+    new Date(payment.paymentDate)
+    .toISOString()
+    .split("T")[0];
+
+    document.getElementById("paymentMethod").value =
+    payment.method;
 
     new bootstrap.Modal(
         document.getElementById("paymentModal")
@@ -415,9 +341,14 @@ async function editPayment(id) {
 
 }
 
+
+// ===============================
+// DELETE
+// ===============================
+
 async function deletePayment(id) {
 
-    if (!confirm("Delete this payment?"))
+    if (!confirm("Delete Payment?"))
         return;
 
     await fetch(`${API}/delete/${id}`, {
@@ -428,53 +359,4 @@ async function deletePayment(id) {
 
     loadPayments();
 
-} 
-
-function resetPaymentForm() {
-
-    editId = null;
-
-    paymentForm.reset();
-
-    document.querySelector(".modal-header h4").innerHTML = `
-        <i class="fa-solid fa-money-check-dollar"></i>
-        Add Payment
-    `;
-
-    document.getElementById("paymentDate").value =
-        new Date().toISOString().split("T")[0];
-
 }
-
-async function loadMembers() {
-
-    try {
-
-        const res = await fetch("/members/all");
-
-        const members = await res.json();
-
-        memberSelect.innerHTML = `
-            <option value="">Select Member</option>
-        `;
-
-        members.forEach(member => {
-
-            memberSelect.innerHTML += `
-                <option value="${member.name}">
-                    ${member.name}
-                </option>
-            `;
-
-        });
-
-    }
-
-    catch (err) {
-
-        console.log(err);
-
-    }
-
-}
-

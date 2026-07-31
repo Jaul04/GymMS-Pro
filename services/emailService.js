@@ -4,155 +4,142 @@ require("dotenv").config();
 
 
 
+const sendExpiryReminder = async (member) => {
 
-const sendExpiryReminder = async(member)=>{
 
+    try {
 
-try{
 
+        await axios.post(
 
-const response = await axios.post(
+            "https://api.brevo.com/v3/smtp/email",
 
-"https://api.brevo.com/v3/smtp/email",
 
+            {
 
-{
+                sender: {
 
-sender:{
+                    name: process.env.BREVO_NAME,
 
-name:process.env.BREVO_NAME,
+                    email: process.env.BREVO_EMAIL
 
-email:process.env.BREVO_EMAIL
+                },
 
-},
 
+                to: [
 
-to:[
+                    {
 
-{
+                        email: member.email,
 
-email:member.email,
+                        name: member.name
 
-name:member.name
+                    }
 
-}
+                ],
 
-],
 
+                subject: "Gym Membership Expiry Reminder",
 
-subject:"Gym Membership Expiry Reminder",
 
+                htmlContent: `
 
+                <h2>GymMS Pro</h2>
 
-htmlContent:`
 
+                <p>Hello <b>${member.name}</b>,</p>
 
-<h2>GymMS Pro</h2>
 
+                <p>Your gym membership is going to expire soon.</p>
 
-<p>Hello <b>${member.name}</b>,</p>
 
+                <p>
 
-<p>Your gym membership is going to expire soon.</p>
+                <b>Plan:</b> ${member.plan}
 
+                <br>
 
-<p>
+                <b>Expiry Date:</b>
 
-<b>Plan:</b> ${member.plan}
+                ${new Date(member.expiryDate).toDateString()}
 
-<br>
+                </p>
 
-<b>Expiry Date:</b>
 
-${new Date(member.expiryDate).toDateString()}
+                <p>
 
-</p>
+                Please renew your membership before expiry.
 
+                </p>
 
-<p>
 
-Please renew your membership before expiry.
+                <br>
 
-</p>
 
+                <p>
 
-<br>
+                Thank You,<br>
 
+                <b>GymMS Pro Team</b>
 
-<p>
+                </p>
 
-Thank You,<br>
+                `
 
-<b>GymMS Pro Team</b>
+            },
 
-</p>
 
+            {
 
-`
+                headers: {
 
+                    "api-key": process.env.BREVO_API_KEY,
 
-},
+                    "Content-Type": "application/json"
 
+                }
 
-{
+            }
 
-headers:{
 
+        );
 
-"api-key":process.env.BREVO_API_KEY,
 
 
-"Content-Type":"application/json"
+        console.log(
+            "Email Sent Successfully:",
+            member.email
+        );
 
 
-}
+        // Important for cron-job.org
+        return true;
 
 
-}
 
+    }
 
 
-);
+    catch(error){
 
 
+        console.log(
 
-console.log(
-"Email Sent Successfully:",
-member.email
-);
+            "Brevo Email Error:",
 
+            error.response?.data || error.message
 
+        );
 
-return response.data;
 
+        throw error;
 
 
-}
-
-
-
-catch(error){
-
-
-console.log(
-
-"Brevo Email Error:",
-
-error.response?.data || error.message
-
-);
-
-
-throw error;
-
-
-}
+    }
 
 
 
 };
-
-
 
 
 

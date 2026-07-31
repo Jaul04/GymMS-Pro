@@ -2,47 +2,26 @@ const express = require("express");
 
 const router = express.Router();
 
-const path = require("path");
-
-
-const attendanceController =
-require("../controllers/attendanceController");
-
-
-console.log("✅ Attendance Routes Loaded");
+const attendanceController = require("../controllers/attendanceController");
 
 
 
-// Attendance Page
+// ============================
+// Attendance Page / Get All
+// URL: /attendance
+// ============================
 
-router.get("/", (req,res)=>{
-
-
-    res.sendFile(
-
-        path.join(
-
-            __dirname,
-
-            "..",
-
-            "public",
-
-            "views",
-
-            "attendance.html"
-
-        )
-
-    );
-
-
-});
+router.get(
+    "/",
+    attendanceController.getAllAttendance
+);
 
 
 
-
+// ============================
 // Add Attendance
+// URL: /attendance/add
+// ============================
 
 router.post(
     "/add",
@@ -51,8 +30,10 @@ router.post(
 
 
 
-
+// ============================
 // Get All Attendance
+// URL: /attendance/all
+// ============================
 
 router.get(
     "/all",
@@ -61,18 +42,22 @@ router.get(
 
 
 
-
-// Get Attendance By ID
+// ============================
+// Attendance Dashboard Stats
+// URL: /attendance/stats/dashboard
+// ============================
 
 router.get(
-    "/:id",
-    attendanceController.getAttendanceById
+    "/stats/dashboard",
+    attendanceController.attendanceStats
 );
 
 
 
-
+// ============================
 // Update Attendance
+// URL: /attendance/update/:id
+// ============================
 
 router.put(
     "/update/:id",
@@ -81,12 +66,27 @@ router.put(
 
 
 
-
+// ============================
 // Delete Attendance
+// URL: /attendance/delete/:id
+// ============================
 
 router.delete(
     "/delete/:id",
     attendanceController.deleteAttendance
+);
+
+
+
+// ============================
+// Get Single Attendance
+// URL: /attendance/:id
+// KEEP LAST
+// ============================
+
+router.get(
+    "/:id",
+    attendanceController.getAttendanceById
 );
 
 
