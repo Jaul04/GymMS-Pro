@@ -81,11 +81,8 @@ const createOrder = async (req, res) => {
 // ADD PAYMENT
 // ===============================
 
-// ===============================
-// ADD PAYMENT
-// ===============================
-
 const addPayment = async (req,res)=>{
+
 
     try{
 
@@ -93,52 +90,77 @@ const addPayment = async (req,res)=>{
         const count = await Payment.countDocuments();
 
 
+
         const payment = new Payment({
 
 
+
             paymentId:
+
                 "PAY" +
+
                 String(count + 1).padStart(3,"0"),
 
 
+
             memberId:
+
                 req.body.memberId || null,
 
 
+
             memberName:
+
                 req.body.memberName,
 
 
+
             memberEmail:
+
                 req.body.memberEmail,
 
 
+
             memberPhone:
+
                 req.body.memberPhone,
 
 
+
             plan:
+
                 req.body.plan,
 
 
+
             amount:
+
                 req.body.amount,
 
 
+
             paymentDate:
+
                 req.body.paymentDate,
 
 
+
             method:
+
                 req.body.method,
 
 
+
             transactionId:
+
                 req.body.transactionId,
 
 
+
             status:
+
                 req.body.status || "Completed"
+
 
 
         });
@@ -149,66 +171,33 @@ const addPayment = async (req,res)=>{
 
 
 
-        console.log(
-            "✅ Payment Saved:",
-            payment.paymentId
-        );
 
 
-
-        let receiptPath = null;
-
-
-
-        try{
+        // ===============================
+        // GENERATE RECEIPT PDF
+        // ===============================
 
 
-            receiptPath = await generateReceipt({
+        const receiptPath = await generateReceipt({
 
 
-                name:
-                    payment.memberName,
+            name: payment.memberName,
 
 
-                email:
-                    payment.memberEmail,
+            email: payment.memberEmail,
 
 
-                plan:
-                    payment.plan,
+            plan: payment.plan,
 
 
-                amount:
-                    payment.amount,
+            amount: payment.amount,
 
 
-                paymentId:
-                    payment.paymentId
+            paymentId: payment.paymentId
 
 
-            });
+        });
 
-
-
-            console.log(
-                "✅ Receipt Generated:",
-                receiptPath
-            );
-
-
-        }
-
-
-        catch(receiptError){
-
-
-            console.log(
-                "❌ Receipt Generate Error:",
-                receiptError.message
-            );
-
-
-        }
 
 
 
@@ -219,12 +208,10 @@ const addPayment = async (req,res)=>{
             success:true,
 
 
-            message:
-                "Payment Added Successfully",
+            message:"Payment Added Successfully",
 
 
-            receipt:
-                receiptPath,
+            receipt:receiptPath,
 
 
             payment
@@ -241,10 +228,7 @@ const addPayment = async (req,res)=>{
     catch(error){
 
 
-        console.log(
-            "🔥 ADD PAYMENT ERROR:",
-            error
-        );
+        console.log("Add Payment Error:",error);
 
 
 

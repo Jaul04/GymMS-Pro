@@ -23,6 +23,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
 rel="stylesheet">
 
 
+
 <style>
 
 body{
@@ -34,7 +35,6 @@ body{
     justify-content:center;
 
 }
-
 
 
 .success-card{
@@ -49,7 +49,6 @@ body{
 }
 
 
-
 .logo{
 
     font-size:28px;
@@ -59,7 +58,6 @@ body{
 }
 
 
-
 .logo i{
 
     color:#198754;
@@ -67,13 +65,11 @@ body{
 }
 
 
-
 .success-icon{
 
     font-size:80px;
 
 }
-
 
 
 .details{
@@ -86,13 +82,11 @@ body{
 }
 
 
-
 .details p{
 
     margin-bottom:12px;
 
 }
-
 
 
 .details strong{
@@ -101,7 +95,6 @@ body{
     display:inline-block;
 
 }
-
 
 
 .btn-home{
@@ -168,8 +161,8 @@ Your Gym Membership has been Activated Successfully.
 
 
 
-<div class="details">
 
+<div class="details">
 
 
 <h5 class="mb-3">
@@ -181,130 +174,66 @@ Payment Receipt
 
 
 
-
 <p>
-
 <strong>Member Name:</strong>
-
-<span id="memberName">
--
-</span>
-
+<span id="memberName">-</span>
 </p>
 
 
 
-
-
 <p>
-
 <strong>Email:</strong>
-
-<span id="email">
--
-</span>
-
+<span id="email">-</span>
 </p>
 
 
 
-
-
 <p>
-
 <strong>Plan:</strong>
-
-<span id="plan">
--
-</span>
-
+<span id="plan">-</span>
 </p>
 
 
 
-
-
 <p>
-
 <strong>Amount:</strong>
-
-₹<span id="amount">
--
-</span>
-
+₹<span id="amount">-</span>
 </p>
 
 
 
-
-
 <p>
-
 <strong>Payment ID:</strong>
-
-<span id="paymentId">
--
-</span>
-
+<span id="paymentId">-</span>
 </p>
 
 
 
-
-
 <p>
-
 <strong>Transaction ID:</strong>
-
-<span id="transactionId">
--
-</span>
-
+<span id="transactionId">-</span>
 </p>
 
 
 
-
-
 <p>
-
 <strong>Payment Method:</strong>
-
-<span id="method">
-Razorpay
-</span>
-
+<span id="method">Razorpay</span>
 </p>
 
 
 
-
-
 <p>
-
 <strong>Join Date:</strong>
-
-<span id="joinDate">
--
-</span>
-
+<span id="joinDate">-</span>
 </p>
-
-
 
 
 
 <p>
-
 <strong>Expiry Date:</strong>
-
-<span id="expiryDate">
--
-</span>
-
+<span id="expiryDate">-</span>
 </p>
-
-
 
 
 
@@ -340,8 +269,6 @@ Go To Home
 
 
 
-
-
 </div>
 
 
@@ -350,7 +277,9 @@ Go To Home
 
 
 
+
 <script>
+
 
 
 const paymentData = JSON.parse(
@@ -365,51 +294,152 @@ if(paymentData){
 
 
 
+// Display Data
+
+
 document.getElementById("memberName").innerText =
 paymentData.name || "-";
-
 
 
 document.getElementById("email").innerText =
 paymentData.email || "-";
 
 
-
 document.getElementById("plan").innerText =
 paymentData.plan || "-";
-
 
 
 document.getElementById("amount").innerText =
 paymentData.amount || "-";
 
 
-
 document.getElementById("paymentId").innerText =
 paymentData.paymentId || "-";
 
+
+document.getElementById("transactionId").innerText =
+paymentData.transactionId || paymentData.paymentId || "-";
 
 
 document.getElementById("method").innerText =
 paymentData.paymentMethod || "Razorpay";
 
 
-
-// JOIN DATE
-
 document.getElementById("joinDate").innerText =
 paymentData.joinDate || "-";
 
-
-
-// EXPIRY DATE
 
 document.getElementById("expiryDate").innerText =
 paymentData.expiryDate || "-";
 
 
 
+
+// ===============================
+// SAVE PAYMENT IN DATABASE
+// ===============================
+
+
+fetch("/payments/add",{
+
+
+method:"POST",
+
+
+headers:{
+
+
+"Content-Type":"application/json"
+
+
+},
+
+
+body:JSON.stringify({
+
+
+memberName:paymentData.name,
+
+
+memberEmail:paymentData.email,
+
+
+memberPhone:paymentData.phone || "Not Provided",
+
+
+plan:paymentData.plan,
+
+
+amount:Number(paymentData.amount),
+
+
+paymentDate:new Date(),
+
+
+method:"Razorpay",
+
+
+transactionId:
+paymentData.transactionId || paymentData.paymentId || "",
+
+
+status:"Completed"
+
+
+
+})
+
+
+})
+
+
+
+.then(res=>res.json())
+
+
+.then(result=>{
+
+
+console.log(
+"PAYMENT SAVE RESPONSE:",
+result
+);
+
+
+
+if(!result.success){
+
+
+alert(
+
+"Payment Save Failed: " + result.message
+
+);
+
+
 }
+
+
+})
+
+
+
+.catch(error=>{
+
+
+console.log(
+"Payment Save Error:",
+error
+);
+
+
+});
+
+
+
+}
+
+
 
 else{
 
@@ -423,13 +453,11 @@ alert("Payment data not found");
 
 
 
-
 function goHome(){
 
 
 
 localStorage.removeItem("paymentData");
-
 
 
 window.location.href="/";
