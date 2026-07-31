@@ -31,25 +31,25 @@ function updatePlanDetails() {
 
         case "Monthly":
 
-            amount = 999;
+            amount = 1;
             days = 30;
             break;
 
         case "Quarterly":
 
-            amount = 2500;
+            amount = 2;
             days = 90;
             break;
 
         case "Half-Yearly":
 
-            amount = 5000;
+            amount = 3;
             days = 180;
             break;
 
         case "Yearly":
 
-            amount = 9000;
+            amount = 4;
             days = 365;
             break;
 
