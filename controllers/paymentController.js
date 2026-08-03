@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const Payment = require("../models/Payment");
 const Member = require("../models/Member");
 const Razorpay = require("razorpay");
@@ -8,7 +6,6 @@ const crypto = require("crypto");
 const {
     generateReceipt
 } = require("./receiptController");
-
 
 
 const razorpay = new Razorpay({
@@ -22,78 +19,60 @@ const razorpay = new Razorpay({
 
 
 
-
 // ===============================
 // CREATE RAZORPAY ORDER
 // ===============================
 
-const createOrder = async(req,res)=>{
+const createOrder = async (req, res) => {
+
+    try {
 
 
-try{
+        const { amount } = req.body;
 
 
-const {amount}=req.body;
+        const options = {
+
+            amount: Number(amount) * 100,
+
+            currency: "INR",
+
+            receipt: "receipt_" + Date.now()
+
+        };
 
 
-if(!amount){
-
-return res.json({
-
-success:false,
-
-message:"Amount required"
-
-});
-
-}
+        const order = await razorpay.orders.create(options);
 
 
+        res.json({
 
-const order = await razorpay.orders.create({
+            success: true,
 
-amount:Number(amount)*100,
+            order
 
-currency:"INR",
-
-receipt:"GYMMS_"+Date.now()
-
-});
+        });
 
 
-
-res.json({
-
-success:true,
-
-order
-
-});
+    }
 
 
-}
+    catch(error){
 
 
-catch(error){
+        console.log("Create Order Error:",error);
 
 
-console.log(
-"CREATE ORDER ERROR:",
-error
-);
+        res.status(500).json({
+
+            success:false,
+
+            message:error.message
+
+        });
 
 
-res.status(500).json({
-
-success:false,
-
-message:error.message
-
-});
-
-
-}
-
+    }
 
 };
 
@@ -102,247 +81,258 @@ message:error.message
 
 
 
-
 // ===============================
-// VERIFY ONLINE PAYMENT
+// VERIFY RAZORPAY PAYMENT
 // ===============================
 
 const verifyPayment = async(req,res)=>{
 
+    try{
 
-try{
 
+        const {
 
-const {
+            paymentResponse,
 
-paymentResponse,
+            memberData
 
-memberData
+        } = req.body;
 
-}=req.body;
 
 
+        const body =
 
-// VERIFY SIGNATURE
+        paymentResponse.razorpay_order_id
 
+        +
 
-const body =
+        "|"
 
-paymentResponse.razorpay_order_id
+        +
 
-+
+        paymentResponse.razorpay_payment_id;
 
-"|"
 
-+
 
-paymentResponse.razorpay_payment_id;
 
+        const expectedSignature = crypto
 
+        .createHmac(
 
-const expectedSignature = crypto
+            "sha256",
 
-.createHmac(
+            process.env.RAZORPAY_KEY_SECRET
 
-"sha256",
+        )
 
-process.env.RAZORPAY_KEY_SECRET
+        .update(body)
 
-)
+        .digest("hex");
 
-.update(body)
 
-.digest("hex");
 
 
 
+        if(expectedSignature !== paymentResponse.razorpay_signature){
 
 
-if(expectedSignature !== paymentResponse.razorpay_signature){
+            return res.json({
 
+                success:false,
 
-return res.json({
+                message:"Invalid Signature"
 
-success:false,
+            });
 
-message:"Invalid Signature"
 
-});
+        }
 
 
-}
 
 
 
+        // FIND MEMBER
 
+        const member = await Member.findOne({
 
-// ===============================
-// FIND MEMBER USING ID
-// ===============================
+            email:memberData.email
 
+        });
 
-let member = await Member.findById(
 
-memberData._id
 
-);
 
 
+        if(!member){
 
 
+            return res.json({
 
-// IF MEMBER NOT FOUND CREATE
+                success:false,
 
-if(!member){
+                message:"Member not found"
 
+            });
 
-member = await Member.create({
 
+        }
 
-name:memberData.name,
 
-email:memberData.email,
 
-phone:memberData.phone,
 
-plan:memberData.plan,
 
-amount:Number(memberData.amount),
 
-status:"Pending",
+        // UPDATE MEMBER PAYMENT STATUS
 
-paymentStatus:"Pending",
 
-registrationType:"Online"
+        member.status="Active";
 
-});
+        member.paymentStatus="Paid";
 
+        member.paymentMethod="Razorpay";
 
-}
+        member.transactionId =
 
+        paymentResponse.razorpay_payment_id;
 
 
 
+        await member.save();
 
 
 
-// UPDATE MEMBER
 
 
-member.status="Active";
 
-member.paymentStatus="Paid";
 
-member.paymentMethod="Razorpay";
+        // SAVE ONLINE PAYMENT
 
-member.transactionId =
-paymentResponse.razorpay_payment_id;
 
+        const payment = await Payment.create({
 
-await member.save();
 
+            memberId:
 
+            member._id,
 
 
+            memberName:
 
+            member.name,
 
 
-// SAVE PAYMENT
+            memberEmail:
 
+            member.email,
 
-const payment = await Payment.create({
 
+            memberPhone:
 
-memberId:member._id,
+            member.phone,
 
-memberName:member.name,
 
-memberEmail:member.email,
+            plan:
 
-memberPhone:member.phone,
+            member.plan,
 
-plan:member.plan,
 
-amount:Number(member.amount),
+            amount:
 
+            Number(member.amount),
 
-paymentMode:"Razorpay",
 
-source:"Online",
 
-paymentStatus:"Paid",
+            paymentMode:
 
+            "Razorpay",
 
-razorpayOrderId:
-paymentResponse.razorpay_order_id,
 
 
-razorpayPaymentId:
-paymentResponse.razorpay_payment_id,
+            source:
 
+            "Online",
 
-razorpaySignature:
-paymentResponse.razorpay_signature
 
 
-});
+            paymentStatus:
 
+            "Paid",
 
 
 
+            razorpayOrderId:
 
+            paymentResponse.razorpay_order_id,
 
 
-console.log(
 
-"ONLINE PAYMENT SAVED:",
+            razorpayPaymentId:
 
-payment._id
+            paymentResponse.razorpay_payment_id,
 
-);
 
 
+            razorpaySignature:
 
+            paymentResponse.razorpay_signature
 
 
-res.json({
+        });
 
-success:true,
 
-message:"Payment Successful",
 
-payment
 
-});
 
+        console.log(
 
+            "ONLINE PAYMENT SAVED:",
 
+            payment._id
 
-}
+        );
 
 
-catch(error){
 
 
-console.log(
 
-"VERIFY ERROR:",
 
-error
+        res.json({
 
-);
+            success:true,
 
+            message:"Payment Successful",
 
-res.status(500).json({
+            payment
 
-success:false,
+        });
 
-message:error.message
 
-});
 
+    }
 
-}
+
+    catch(error){
+
+
+        console.log(
+
+            "VERIFY ERROR:",
+
+            error
+
+        );
+
+
+        res.status(500).json({
+
+            success:false,
+
+            message:error.message
+
+        });
+
+
+    }
 
 
 };
@@ -355,82 +345,172 @@ message:error.message
 
 
 
-
 // ===============================
-// ADD OFFLINE PAYMENT
+// ADD PAYMENT
 // ===============================
 
-
-const addPayment = async(req,res)=>{
-
-
-try{
+const addPayment = async (req,res)=>{
 
 
-const payment = await Payment.create({
+    try{
 
-memberId:req.body.memberId || null,
 
-memberName:req.body.memberName,
-
-memberEmail:req.body.memberEmail,
-
-memberPhone:req.body.memberPhone,
-
-plan:req.body.plan,
-
-amount:Number(req.body.amount),
-
-paymentMode:req.body.paymentMode || "Cash",
-
-source:"Offline",
-
-paymentStatus:"Paid"
-
-});
+        const count = await Payment.countDocuments();
 
 
 
-
-res.json({
-
-success:true,
-
-message:"Payment Added Successfully",
-
-payment
-
-});
+        const payment = new Payment({
 
 
-}
+
+            paymentId:
+
+                "PAY" +
+
+                String(count + 1).padStart(3,"0"),
 
 
-catch(error){
+
+            memberId:
+
+                req.body.memberId || null,
 
 
-console.log(
 
-"ADD PAYMENT ERROR:",
+            memberName:
 
-error
-
-);
+                req.body.memberName,
 
 
-res.status(500).json({
 
-success:false,
+            memberEmail:
 
-message:error.message
-
-});
+                req.body.memberEmail,
 
 
-}
+
+            memberPhone:
+
+                req.body.memberPhone,
+
+
+
+            plan:
+
+                req.body.plan,
+
+
+
+            amount:
+
+                req.body.amount,
+
+
+
+            paymentDate:
+
+                req.body.paymentDate,
+
+
+
+            method:
+
+                req.body.method,
+
+
+
+            transactionId:
+
+                req.body.transactionId,
+
+
+
+            status:
+
+                req.body.status || "Completed"
+
+
+        });
+
+
+
+        await payment.save();
+
+
+
+
+
+        const receiptPath = await generateReceipt({
+
+
+            name: payment.memberName,
+
+
+            email: payment.memberEmail,
+
+
+            plan: payment.plan,
+
+
+            amount: payment.amount,
+
+
+            paymentId: payment.paymentId
+
+
+        });
+
+
+
+
+
+        res.status(201).json({
+
+
+            success:true,
+
+
+            message:"Payment Added Successfully",
+
+
+            receipt:receiptPath,
+
+
+            payment
+
+
+        });
+
+
+
+    }
+
+
+
+    catch(error){
+
+
+        console.log("Add Payment Error:",error);
+
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            message:error.message
+
+
+        });
+
+
+    }
 
 
 };
+
 
 
 
@@ -446,42 +526,258 @@ message:error.message
 const getAllPayments = async(req,res)=>{
 
 
-try{
+    try{
 
 
-const payments = await Payment.find()
+        const payments = await Payment.find()
 
-.sort({
+        .sort({
 
-createdAt:-1
+            createdAt:-1
 
-});
-
-
-res.json({
-
-success:true,
-
-payments
-
-});
+        });
 
 
-}
 
-catch(error){
-
-
-res.status(500).json({
-
-success:false,
-
-message:error.message
-
-});
+        res.json({
 
 
-}
+            success:true,
+
+
+            payments
+
+
+        });
+
+
+    }
+
+
+    catch(error){
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            message:error.message
+
+
+        });
+
+
+    }
+
+
+};
+
+
+
+
+
+
+// ===============================
+// GET PAYMENT BY ID
+// ===============================
+
+
+const getPaymentById = async(req,res)=>{
+
+
+    try{
+
+
+        const payment = await Payment.findById(
+
+            req.params.id
+
+        );
+
+
+
+        if(!payment){
+
+
+            return res.status(404).json({
+
+
+                success:false,
+
+
+                message:"Payment Not Found"
+
+
+            });
+
+
+        }
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+            payment
+
+
+        });
+
+
+
+    }
+
+
+    catch(error){
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            message:error.message
+
+
+        });
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+// ===============================
+// UPDATE PAYMENT
+// ===============================
+
+
+const updatePayment = async(req,res)=>{
+
+
+    try{
+
+
+        const payment = await Payment.findByIdAndUpdate(
+
+
+            req.params.id,
+
+
+            {
+
+
+                memberName:req.body.memberName,
+
+
+                memberEmail:req.body.memberEmail,
+
+
+                memberPhone:req.body.memberPhone,
+
+
+                plan:req.body.plan,
+
+
+                amount:req.body.amount,
+
+
+                paymentDate:req.body.paymentDate,
+
+
+                method:req.body.method,
+
+
+                transactionId:req.body.transactionId,
+
+
+                status:req.body.status
+
+
+            },
+
+
+
+            {
+
+
+                new:true
+
+
+            }
+
+
+
+        );
+
+
+
+        if(!payment){
+
+
+            return res.status(404).json({
+
+
+                success:false,
+
+
+                message:"Payment Not Found"
+
+
+            });
+
+
+        }
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+            message:"Payment Updated Successfully",
+
+
+            payment
+
+
+        });
+
+
+
+    }
+
+
+    catch(error){
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            message:error.message
+
+
+        });
+
+
+    }
 
 
 };
@@ -493,16 +789,101 @@ message:error.message
 
 
 
+
+// ===============================
+// DELETE PAYMENT
+// ===============================
+
+
+const deletePayment = async(req,res)=>{
+
+
+    try{
+
+
+        const payment = await Payment.findByIdAndDelete(
+
+
+            req.params.id
+
+
+        );
+
+
+
+        if(!payment){
+
+
+            return res.status(404).json({
+
+
+                success:false,
+
+
+                message:"Payment Not Found"
+
+
+            });
+
+
+        }
+
+
+
+        res.json({
+
+
+            success:true,
+
+
+            message:"Payment Deleted Successfully"
+
+
+        });
+
+
+    }
+
+
+    catch(error){
+
+
+        res.status(500).json({
+
+
+            success:false,
+
+
+            message:error.message
+
+
+        });
+
+
+    }
+
+
+};
+
+
+
+
+
 module.exports = {
 
 
-createOrder,
+    createOrder,
 
-verifyPayment,
+    verifyPayment,
 
-addPayment,
+    addPayment,
 
-getAllPayments
+    getAllPayments,
 
+    getPaymentById,
+
+    updatePayment,
+
+    deletePayment
 
 };
