@@ -1,7 +1,5 @@
 const Payment = require("../models/Payment");
-const Member = require("../models/Member");
 const Razorpay = require("razorpay");
-const crypto = require("crypto");
 
 const {
     generateReceipt
@@ -18,15 +16,9 @@ const razorpay = new Razorpay({
 
 
 
-
-// ===============================
-// CREATE RAZORPAY ORDER
-// ===============================
-
 const createOrder = async (req, res) => {
 
     try {
-
 
         const { amount } = req.body;
 
@@ -54,11 +46,7 @@ const createOrder = async (req, res) => {
         });
 
 
-    }
-
-
-    catch(error){
-
+    } catch(error){
 
         console.log("Create Order Error:",error);
 
@@ -71,286 +59,14 @@ const createOrder = async (req, res) => {
 
         });
 
-
     }
 
 };
 
 
 
-
-
-
-// ===============================
-// VERIFY RAZORPAY PAYMENT
-// ===============================
-
-const verifyPayment = async(req,res)=>{
-
-    try{
-
-
-        const {
-
-            paymentResponse,
-
-            memberData
-
-        } = req.body;
-
-
-
-        const body =
-
-        paymentResponse.razorpay_order_id
-
-        +
-
-        "|"
-
-        +
-
-        paymentResponse.razorpay_payment_id;
-
-
-
-
-        const expectedSignature = crypto
-
-        .createHmac(
-
-            "sha256",
-
-            process.env.RAZORPAY_KEY_SECRET
-
-        )
-
-        .update(body)
-
-        .digest("hex");
-
-
-
-
-
-        if(expectedSignature !== paymentResponse.razorpay_signature){
-
-
-            return res.json({
-
-                success:false,
-
-                message:"Invalid Signature"
-
-            });
-
-
-        }
-
-
-
-
-
-        // FIND MEMBER
-
-        const member = await Member.findOne({
-
-            email:memberData.email
-
-        });
-
-
-
-
-
-        if(!member){
-
-
-            return res.json({
-
-                success:false,
-
-                message:"Member not found"
-
-            });
-
-
-        }
-
-
-
-
-
-
-        // UPDATE MEMBER PAYMENT STATUS
-
-
-        member.status="Active";
-
-        member.paymentStatus="Paid";
-
-        member.paymentMethod="Razorpay";
-
-        member.transactionId =
-
-        paymentResponse.razorpay_payment_id;
-
-
-
-        await member.save();
-
-
-
-
-
-
-
-        // SAVE ONLINE PAYMENT
-
-
-        const payment = await Payment.create({
-
-
-            memberId:
-
-            member._id,
-
-
-            memberName:
-
-            member.name,
-
-
-            memberEmail:
-
-            member.email,
-
-
-            memberPhone:
-
-            member.phone,
-
-
-            plan:
-
-            member.plan,
-
-
-            amount:
-
-            Number(member.amount),
-
-
-
-            paymentMode:
-
-            "Razorpay",
-
-
-
-            source:
-
-            "Online",
-
-
-
-            paymentStatus:
-
-            "Paid",
-
-
-
-            razorpayOrderId:
-
-            paymentResponse.razorpay_order_id,
-
-
-
-            razorpayPaymentId:
-
-            paymentResponse.razorpay_payment_id,
-
-
-
-            razorpaySignature:
-
-            paymentResponse.razorpay_signature
-
-
-        });
-
-
-
-
-
-        console.log(
-
-            "ONLINE PAYMENT SAVED:",
-
-            payment._id
-
-        );
-
-
-
-
-
-
-        res.json({
-
-            success:true,
-
-            message:"Payment Successful",
-
-            payment
-
-        });
-
-
-
-    }
-
-
-    catch(error){
-
-
-        console.log(
-
-            "VERIFY ERROR:",
-
-            error
-
-        );
-
-
-        res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-// ===============================
-// ADD PAYMENT
-// ===============================
 
 const addPayment = async (req,res)=>{
-
 
     try{
 
@@ -358,10 +74,7 @@ const addPayment = async (req,res)=>{
         const count = await Payment.countDocuments();
 
 
-
         const payment = new Payment({
-
-
 
             paymentId:
 
@@ -370,11 +83,9 @@ const addPayment = async (req,res)=>{
                 String(count + 1).padStart(3,"0"),
 
 
-
             memberId:
 
                 req.body.memberId || null,
-
 
 
             memberName:
@@ -382,11 +93,9 @@ const addPayment = async (req,res)=>{
                 req.body.memberName,
 
 
-
             memberEmail:
 
                 req.body.memberEmail,
-
 
 
             memberPhone:
@@ -394,11 +103,9 @@ const addPayment = async (req,res)=>{
                 req.body.memberPhone,
 
 
-
             plan:
 
                 req.body.plan,
-
 
 
             amount:
@@ -406,11 +113,9 @@ const addPayment = async (req,res)=>{
                 req.body.amount,
 
 
-
             paymentDate:
 
                 req.body.paymentDate,
-
 
 
             method:
@@ -418,17 +123,14 @@ const addPayment = async (req,res)=>{
                 req.body.method,
 
 
-
             transactionId:
 
                 req.body.transactionId,
 
 
-
             status:
 
                 req.body.status || "Completed"
-
 
         });
 
@@ -439,88 +141,57 @@ const addPayment = async (req,res)=>{
 
 
 
-
         const receiptPath = await generateReceipt({
-
 
             name: payment.memberName,
 
-
             email: payment.memberEmail,
-
 
             plan: payment.plan,
 
-
             amount: payment.amount,
-
 
             paymentId: payment.paymentId
 
-
         });
-
 
 
 
 
         res.status(201).json({
 
-
             success:true,
-
 
             message:"Payment Added Successfully",
 
-
             receipt:receiptPath,
 
-
             payment
-
 
         });
 
 
-
-    }
-
-
-
-    catch(error){
+    } catch(error){
 
 
         console.log("Add Payment Error:",error);
 
 
-
         res.status(500).json({
-
 
             success:false,
 
-
             message:error.message
-
 
         });
 
 
     }
 
-
 };
 
 
 
-
-
-
-
-
-// ===============================
-// GET ALL PAYMENTS
-// ===============================
 
 
 const getAllPayments = async(req,res)=>{
@@ -541,30 +212,21 @@ const getAllPayments = async(req,res)=>{
 
         res.json({
 
-
             success:true,
 
-
             payments
-
 
         });
 
 
-    }
-
-
-    catch(error){
+    } catch(error){
 
 
         res.status(500).json({
 
-
             success:false,
 
-
             message:error.message
-
 
         });
 
@@ -577,11 +239,6 @@ const getAllPayments = async(req,res)=>{
 
 
 
-
-
-// ===============================
-// GET PAYMENT BY ID
-// ===============================
 
 
 const getPaymentById = async(req,res)=>{
@@ -603,12 +260,9 @@ const getPaymentById = async(req,res)=>{
 
             return res.status(404).json({
 
-
                 success:false,
 
-
                 message:"Payment Not Found"
-
 
             });
 
@@ -619,31 +273,22 @@ const getPaymentById = async(req,res)=>{
 
         res.json({
 
-
             success:true,
 
-
             payment
-
 
         });
 
 
 
-    }
-
-
-    catch(error){
+    } catch(error){
 
 
         res.status(500).json({
 
-
             success:false,
 
-
             message:error.message
-
 
         });
 
@@ -657,11 +302,6 @@ const getPaymentById = async(req,res)=>{
 
 
 
-
-
-// ===============================
-// UPDATE PAYMENT
-// ===============================
 
 
 const updatePayment = async(req,res)=>{
@@ -709,15 +349,12 @@ const updatePayment = async(req,res)=>{
             },
 
 
-
             {
 
 
                 new:true
 
-
             }
-
 
 
         );
@@ -729,12 +366,9 @@ const updatePayment = async(req,res)=>{
 
             return res.status(404).json({
 
-
                 success:false,
 
-
                 message:"Payment Not Found"
-
 
             });
 
@@ -745,34 +379,24 @@ const updatePayment = async(req,res)=>{
 
         res.json({
 
-
             success:true,
-
 
             message:"Payment Updated Successfully",
 
-
             payment
-
 
         });
 
 
 
-    }
-
-
-    catch(error){
+    } catch(error){
 
 
         res.status(500).json({
 
-
             success:false,
 
-
             message:error.message
-
 
         });
 
@@ -789,12 +413,6 @@ const updatePayment = async(req,res)=>{
 
 
 
-
-// ===============================
-// DELETE PAYMENT
-// ===============================
-
-
 const deletePayment = async(req,res)=>{
 
 
@@ -803,9 +421,7 @@ const deletePayment = async(req,res)=>{
 
         const payment = await Payment.findByIdAndDelete(
 
-
             req.params.id
-
 
         );
 
@@ -816,12 +432,9 @@ const deletePayment = async(req,res)=>{
 
             return res.status(404).json({
 
-
                 success:false,
 
-
                 message:"Payment Not Found"
-
 
             });
 
@@ -832,30 +445,22 @@ const deletePayment = async(req,res)=>{
 
         res.json({
 
-
             success:true,
 
-
             message:"Payment Deleted Successfully"
-
 
         });
 
 
-    }
 
-
-    catch(error){
+    } catch(error){
 
 
         res.status(500).json({
 
-
             success:false,
 
-
             message:error.message
-
 
         });
 
@@ -871,10 +476,7 @@ const deletePayment = async(req,res)=>{
 
 module.exports = {
 
-
     createOrder,
-
-    verifyPayment,
 
     addPayment,
 
