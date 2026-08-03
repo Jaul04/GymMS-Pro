@@ -1,9 +1,14 @@
+require("dotenv").config();
+
 const Payment = require("../models/Payment");
+const Member = require("../models/Member");
 const Razorpay = require("razorpay");
+const crypto = require("crypto");
 
 const {
     generateReceipt
 } = require("./receiptController");
+
 
 
 const razorpay = new Razorpay({
@@ -16,60 +21,79 @@ const razorpay = new Razorpay({
 
 
 
+
+
 // ===============================
 // CREATE RAZORPAY ORDER
 // ===============================
 
-const createOrder = async (req, res) => {
-
-    try {
+const createOrder = async(req,res)=>{
 
 
-        const { amount } = req.body;
+try{
 
 
-        const options = {
-
-            amount: Number(amount) * 100,
-
-            currency: "INR",
-
-            receipt: "receipt_" + Date.now()
-
-        };
+const {amount}=req.body;
 
 
-        const order = await razorpay.orders.create(options);
+if(!amount){
+
+return res.json({
+
+success:false,
+
+message:"Amount required"
+
+});
+
+}
 
 
-        res.json({
 
-            success: true,
+const order = await razorpay.orders.create({
 
-            order
+amount:Number(amount)*100,
 
-        });
+currency:"INR",
 
+receipt:"GYMMS_"+Date.now()
 
-    }
-
-
-    catch(error){
+});
 
 
-        console.log("Create Order Error:",error);
+
+res.json({
+
+success:true,
+
+order
+
+});
 
 
-        res.status(500).json({
-
-            success:false,
-
-            message:error.message
-
-        });
+}
 
 
-    }
+catch(error){
+
+
+console.log(
+"CREATE ORDER ERROR:",
+error
+);
+
+
+res.status(500).json({
+
+success:false,
+
+message:error.message
+
+});
+
+
+}
+
 
 };
 
@@ -77,177 +101,337 @@ const createOrder = async (req, res) => {
 
 
 
+
+
 // ===============================
-// ADD PAYMENT
+// VERIFY ONLINE PAYMENT
 // ===============================
 
-const addPayment = async (req,res)=>{
+const verifyPayment = async(req,res)=>{
 
 
-    try{
+try{
 
 
-        const count = await Payment.countDocuments();
+const {
 
+paymentResponse,
 
+memberData
 
-        const payment = new Payment({
+}=req.body;
 
 
 
-            paymentId:
+// VERIFY SIGNATURE
 
-                "PAY" +
 
-                String(count + 1).padStart(3,"0"),
+const body =
 
+paymentResponse.razorpay_order_id
 
++
 
-            memberId:
+"|"
 
-                req.body.memberId || null,
++
 
+paymentResponse.razorpay_payment_id;
 
 
-            memberName:
 
-                req.body.memberName,
+const expectedSignature = crypto
 
+.createHmac(
 
+"sha256",
 
-            memberEmail:
+process.env.RAZORPAY_KEY_SECRET
 
-                req.body.memberEmail,
+)
 
+.update(body)
 
+.digest("hex");
 
-            memberPhone:
 
-                req.body.memberPhone,
 
 
 
-            plan:
+if(expectedSignature !== paymentResponse.razorpay_signature){
 
-                req.body.plan,
 
+return res.json({
 
+success:false,
 
-            amount:
+message:"Invalid Signature"
 
-                req.body.amount,
+});
 
 
+}
 
-            paymentDate:
 
-                req.body.paymentDate,
 
 
 
-            method:
+// ===============================
+// FIND MEMBER USING ID
+// ===============================
 
-                req.body.method,
 
+let member = await Member.findById(
 
+memberData._id
 
-            transactionId:
+);
 
-                req.body.transactionId,
 
 
 
-            status:
 
-                req.body.status || "Completed"
+// IF MEMBER NOT FOUND CREATE
 
+if(!member){
 
 
-        });
+member = await Member.create({
 
 
+name:memberData.name,
 
-        await payment.save();
+email:memberData.email,
 
+phone:memberData.phone,
 
+plan:memberData.plan,
 
+amount:Number(memberData.amount),
 
+status:"Pending",
 
-        // ===============================
-        // GENERATE RECEIPT PDF
-        // ===============================
+paymentStatus:"Pending",
 
+registrationType:"Online"
 
-        const receiptPath = await generateReceipt({
+});
 
 
-            name: payment.memberName,
+}
 
 
-            email: payment.memberEmail,
 
 
-            plan: payment.plan,
 
 
-            amount: payment.amount,
 
+// UPDATE MEMBER
 
-            paymentId: payment.paymentId
 
+member.status="Active";
 
-        });
+member.paymentStatus="Paid";
 
+member.paymentMethod="Razorpay";
 
+member.transactionId =
+paymentResponse.razorpay_payment_id;
 
 
+await member.save();
 
-        res.status(201).json({
 
 
-            success:true,
 
 
-            message:"Payment Added Successfully",
 
 
-            receipt:receiptPath,
+// SAVE PAYMENT
 
 
-            payment
+const payment = await Payment.create({
 
 
-        });
+memberId:member._id,
 
+memberName:member.name,
 
+memberEmail:member.email,
 
-    }
+memberPhone:member.phone,
 
+plan:member.plan,
 
+amount:Number(member.amount),
 
-    catch(error){
 
+paymentMode:"Razorpay",
 
-        console.log("Add Payment Error:",error);
+source:"Online",
 
+paymentStatus:"Paid",
 
 
-        res.status(500).json({
+razorpayOrderId:
+paymentResponse.razorpay_order_id,
 
 
-            success:false,
+razorpayPaymentId:
+paymentResponse.razorpay_payment_id,
 
 
-            message:error.message
+razorpaySignature:
+paymentResponse.razorpay_signature
 
 
-        });
+});
 
 
-    }
+
+
+
+
+
+console.log(
+
+"ONLINE PAYMENT SAVED:",
+
+payment._id
+
+);
+
+
+
+
+
+res.json({
+
+success:true,
+
+message:"Payment Successful",
+
+payment
+
+});
+
+
+
+
+}
+
+
+catch(error){
+
+
+console.log(
+
+"VERIFY ERROR:",
+
+error
+
+);
+
+
+res.status(500).json({
+
+success:false,
+
+message:error.message
+
+});
+
+
+}
 
 
 };
+
+
+
+
+
+
+
+
+
+
+// ===============================
+// ADD OFFLINE PAYMENT
+// ===============================
+
+
+const addPayment = async(req,res)=>{
+
+
+try{
+
+
+const payment = await Payment.create({
+
+memberId:req.body.memberId || null,
+
+memberName:req.body.memberName,
+
+memberEmail:req.body.memberEmail,
+
+memberPhone:req.body.memberPhone,
+
+plan:req.body.plan,
+
+amount:Number(req.body.amount),
+
+paymentMode:req.body.paymentMode || "Cash",
+
+source:"Offline",
+
+paymentStatus:"Paid"
+
+});
+
+
+
+
+res.json({
+
+success:true,
+
+message:"Payment Added Successfully",
+
+payment
+
+});
+
+
+}
+
+
+catch(error){
+
+
+console.log(
+
+"ADD PAYMENT ERROR:",
+
+error
+
+);
+
+
+res.status(500).json({
+
+success:false,
+
+message:error.message
+
+});
+
+
+}
+
+
+};
+
 
 
 
@@ -262,344 +446,48 @@ const addPayment = async (req,res)=>{
 const getAllPayments = async(req,res)=>{
 
 
-    try{
+try{
 
 
-        const payments = await Payment.find()
+const payments = await Payment.find()
 
-        .sort({
+.sort({
 
-            createdAt:-1
+createdAt:-1
 
-        });
-
-
-
-        res.json({
+});
 
 
-            success:true,
+res.json({
+
+success:true,
+
+payments
+
+});
 
 
-            payments
+}
+
+catch(error){
 
 
-        });
+res.status(500).json({
+
+success:false,
+
+message:error.message
+
+});
 
 
-    }
-
-
-    catch(error){
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-
-            message:error.message
-
-
-        });
-
-
-    }
+}
 
 
 };
 
 
 
-
-
-
-// ===============================
-// GET PAYMENT BY ID
-// ===============================
-
-
-const getPaymentById = async(req,res)=>{
-
-
-    try{
-
-
-        const payment = await Payment.findById(
-
-            req.params.id
-
-        );
-
-
-
-        if(!payment){
-
-
-            return res.status(404).json({
-
-
-                success:false,
-
-
-                message:"Payment Not Found"
-
-
-            });
-
-
-        }
-
-
-
-        res.json({
-
-
-            success:true,
-
-
-            payment
-
-
-        });
-
-
-
-    }
-
-
-    catch(error){
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-
-            message:error.message
-
-
-        });
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-// ===============================
-// UPDATE PAYMENT
-// ===============================
-
-
-const updatePayment = async(req,res)=>{
-
-
-    try{
-
-
-        const payment = await Payment.findByIdAndUpdate(
-
-
-            req.params.id,
-
-
-            {
-
-
-                memberName:req.body.memberName,
-
-
-                memberEmail:req.body.memberEmail,
-
-
-                memberPhone:req.body.memberPhone,
-
-
-                plan:req.body.plan,
-
-
-                amount:req.body.amount,
-
-
-                paymentDate:req.body.paymentDate,
-
-
-                method:req.body.method,
-
-
-                transactionId:req.body.transactionId,
-
-
-                status:req.body.status
-
-
-            },
-
-
-
-            {
-
-
-                new:true
-
-
-            }
-
-
-
-        );
-
-
-
-        if(!payment){
-
-
-            return res.status(404).json({
-
-
-                success:false,
-
-
-                message:"Payment Not Found"
-
-
-            });
-
-
-        }
-
-
-
-        res.json({
-
-
-            success:true,
-
-
-            message:"Payment Updated Successfully",
-
-
-            payment
-
-
-        });
-
-
-
-    }
-
-
-    catch(error){
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-
-            message:error.message
-
-
-        });
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-// ===============================
-// DELETE PAYMENT
-// ===============================
-
-
-const deletePayment = async(req,res)=>{
-
-
-    try{
-
-
-        const payment = await Payment.findByIdAndDelete(
-
-
-            req.params.id
-
-
-        );
-
-
-
-        if(!payment){
-
-
-            return res.status(404).json({
-
-
-                success:false,
-
-
-                message:"Payment Not Found"
-
-
-            });
-
-
-        }
-
-
-
-        res.json({
-
-
-            success:true,
-
-
-            message:"Payment Deleted Successfully"
-
-
-        });
-
-
-
-    }
-
-
-    catch(error){
-
-
-        res.status(500).json({
-
-
-            success:false,
-
-
-            message:error.message
-
-
-        });
-
-
-    }
-
-
-};
 
 
 
@@ -608,22 +496,13 @@ const deletePayment = async(req,res)=>{
 module.exports = {
 
 
-    createOrder,
+createOrder,
 
+verifyPayment,
 
-    addPayment,
+addPayment,
 
-
-    getAllPayments,
-
-
-    getPaymentById,
-
-
-    updatePayment,
-
-
-    deletePayment
+getAllPayments
 
 
 };
