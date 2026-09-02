@@ -1,8 +1,5 @@
 const Member = require("../models/Member");
 
-// =========================
-// ADD MEMBER
-// =========================
 
 const addMember = async (req, res) => {
 
@@ -89,9 +86,6 @@ const addMember = async (req, res) => {
 
 };
 
-// =========================
-// GET ALL MEMBERS
-// =========================
 
 const getAllMembers = async (req, res) => {
 
@@ -128,9 +122,7 @@ const getAllMembers = async (req, res) => {
 
 };
 
-// =========================
-// UPDATE MEMBER
-// =========================
+ 
 
 const updateMember = async (req, res) => {
 
@@ -177,9 +169,6 @@ const updateMember = async (req, res) => {
 
 };
 
-// =========================
-// DELETE MEMBER
-// =========================
 
 const deleteMember = async (req, res) => {
 
@@ -213,9 +202,6 @@ const deleteMember = async (req, res) => {
 
 };
 
-// =========================
-// GET MEMBER BY ID
-// =========================
 
 const getMemberById = async (req, res) => {
 
@@ -262,9 +248,6 @@ const getMemberById = async (req, res) => {
 
 };
 
-// =========================
-// ONLINE REGISTRATION
-// =========================
 
 const registerMember = async (req, res) => {
 
@@ -409,9 +392,6 @@ const registerMember = async (req, res) => {
     }
 
 };
-// =========================
-// DASHBOARD STATS
-// =========================
 
 const memberStats = async (req, res) => {
 
@@ -509,9 +489,6 @@ const memberStats = async (req, res) => {
 
 };
 
-// =========================
-// EXPORTS
-// =========================
 
 module.exports = {
 

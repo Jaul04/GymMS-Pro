@@ -1,83 +1,56 @@
 const express = require("express");
+
 const router = express.Router();
-const path = require("path");
 
-const paymentController = require("../controllers/paymentController");
+const paymentController =
+    require("../controllers/paymentController");
 
-console.log("✅ Payment Routes Loaded");
+const receiptController =
+    require("../controllers/receiptController");
 
-
-// Payments Page
-
-router.get("/", (req, res) => {
-
-    res.sendFile(
-
-        path.join(
-
-            __dirname,
-
-            "..",
-
-            "public",
-
-            "views",
-
-            "payments.html"
-
-        )
-
-    );
-
-});
-
-
-// Create Razorpay Order
+// ==================================
+// CREATE RAZORPAY ORDER
+// ==================================
 
 router.post(
     "/create-order",
     paymentController.createOrder
 );
 
+// ==================================
+// VERIFY RAZORPAY PAYMENT
+// ==================================
 
-// Add Payment
+router.post(
+    "/verify",
+    paymentController.verifyPayment
+);
+
+// ==================================
+// ADD OFFLINE PAYMENT
+// ==================================
 
 router.post(
     "/add",
-    paymentController.addPayment
+    paymentController.addOfflinePayment
 );
 
-
-// Get All Payments
+// ==================================
+// GET ALL PAYMENTS
+// ==================================
 
 router.get(
     "/all",
     paymentController.getAllPayments
 );
 
-
-// Get Payment By ID
+// ==================================
+// DOWNLOAD PAYMENT RECEIPT
+// ==================================
 
 router.get(
-    "/:id",
-    paymentController.getPaymentById
+    "/receipt/:id",
+    receiptController.downloadReceipt
 );
-
-
-// Update Payment
-
-router.put(
-    "/update/:id",
-    paymentController.updatePayment
-);
-
-
-// Delete Payment
-
-router.delete(
-    "/delete/:id",
-    paymentController.deletePayment
-);
-
 
 module.exports = router;

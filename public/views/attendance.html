@@ -31,9 +31,12 @@ href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&
 rel="stylesheet">
 
 
-
 <link rel="stylesheet" href="/css/attendance.css">
+<link rel="stylesheet" href="/css/main.css?v=2">
 
+
+    <link rel="stylesheet" href="/css/main.css?v=final-common">
+    <link rel="stylesheet" href="/css/common.css?v=1">
 
 </head>
 
@@ -105,7 +108,7 @@ Members
 
 <li>
 
-<a href="/payments">
+<a href="/payment-management">
 
 <i class="bi bi-wallet2"></i>
 
@@ -473,6 +476,52 @@ Absent
 </div>
 
 
+
+<div class="card qr-attendance-card mt-4">
+
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0">
+            <i class="fa-solid fa-qrcode"></i>
+            QR Attendance Scanner
+        </h5>
+        <span class="badge bg-success">FAST CHECK-IN</span>
+    </div>
+
+    <div class="card-body">
+        <div class="row g-4 align-items-center">
+
+            <div class="col-lg-7">
+                <div id="qr-reader" class="qr-reader-box"></div>
+                <div id="qrScanStatus" class="qr-scan-status">
+                    Click <strong>Start Camera</strong> and scan a member QR code.
+                </div>
+                <div class="d-flex gap-2 mt-3 flex-wrap">
+                    <button type="button" id="startQrBtn" class="btn btn-warning">
+                        <i class="fa-solid fa-camera"></i> Start Camera
+                    </button>
+                    <button type="button" id="stopQrBtn" class="btn btn-outline-dark" disabled>
+                        <i class="fa-solid fa-stop"></i> Stop Camera
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="qr-manual-box">
+                    <h6><i class="fa-solid fa-keyboard"></i> Manual Check-In</h6>
+                    <p>Camera unavailable? Enter the member ID printed on the QR card.</p>
+                    <div class="input-group">
+                        <input id="manualMemberId" class="form-control" placeholder="Example: MEM001">
+                        <button type="button" id="manualScanBtn" class="btn btn-dark">Mark Present</button>
+                    </div>
+                    <div class="small text-muted mt-3">
+                        Only <strong>Active</strong> members can be checked in. A member can be marked once per day.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <div class="card table-card mt-4">
 
@@ -943,13 +992,13 @@ Developed by <strong>Jaul Ansar</strong>
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script src="/js/attendance.js?v=4"></script>
 
 
-<script src="/js/attendance.js"></script>
 
 
-
-
+<script src="/js/mobile-nav.js?v=1"></script>
 </body>
 
 

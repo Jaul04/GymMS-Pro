@@ -1,478 +1,441 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt | Gym Pro</title>
 
-<meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --black: #090909;
+            --panel: #121212;
+            --panel-2: #171717;
+            --yellow: #f4b400;
+            --green: #22c55e;
+            --white: #fff;
+            --muted: #b8b8b8;
+            --line: #303030;
+        }
 
+        * { box-sizing: border-box; }
 
-<title>
-Payment Successful | GymMS Pro
-</title>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #e9ecef;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--white);
+        }
 
+        .page-wrap {
+            padding: 35px 15px;
+        }
 
-<link 
-href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-rel="stylesheet">
+        .receipt-shell {
+            width: min(820px, 100%);
+            margin: auto;
+        }
 
+        .success-top {
+            text-align: center;
+            color: #151515;
+            margin-bottom: 20px;
+        }
 
-<link 
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
-rel="stylesheet">
+        .success-top .icon {
+            width: 54px;
+            height: 54px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background: var(--green);
+            color: white;
+            font-size: 25px;
+        }
 
+        .success-top h2 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+        }
 
+        .success-top p {
+            margin: 5px 0 0;
+            color: #555;
+        }
 
-<style>
+        #receiptArea {
+            position: relative;
+            overflow: hidden;
+            background: var(--black);
+            border-radius: 14px;
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,.25);
+        }
 
-body{
+        #receiptArea::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 8px;
+            background: var(--yellow);
+        }
 
-    background:#f4f6f9;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+        .brand-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
 
-}
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
+        .brand-icon {
+            color: var(--yellow);
+            font-size: 32px;
+        }
 
-.success-card{
+        .brand h1 {
+            margin: 0;
+            font-size: 25px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
 
-    width:600px;
-    background:white;
-    padding:40px;
-    border-radius:20px;
-    text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+        .brand small {
+            color: var(--muted);
+            letter-spacing: 1.5px;
+            font-size: 9px;
+        }
 
-}
+        .receipt-title {
+            text-align: right;
+        }
 
+        .receipt-title h3 {
+            margin: 0;
+            font-size: 23px;
+            font-weight: 900;
+        }
 
-.logo{
+        .receipt-title small {
+            color: var(--yellow);
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
 
-    font-size:28px;
-    font-weight:bold;
-    margin-bottom:20px;
+        .beast-strip {
+            margin-top: 26px;
+            padding: 18px 20px;
+            background: var(--panel);
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
 
-}
+        .beast-title {
+            font-size: 31px;
+            font-weight: 900;
+            line-height: 1;
+        }
 
+        .beast-title span { color: var(--yellow); }
 
-.logo i{
+        .beast-sub {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 10px;
+            letter-spacing: .7px;
+        }
 
-    color:#198754;
+        .paid-badge {
+            flex: 0 0 auto;
+            padding: 9px 15px;
+            border-radius: 30px;
+            background: var(--green);
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
 
-}
+        .meta-grid,
+        .member-grid,
+        .payment-grid,
+        .validity-grid {
+            display: grid;
+            gap: 14px;
+        }
 
+        .meta-grid { grid-template-columns: 1fr 1fr; margin-top: 18px; }
+        .member-grid { grid-template-columns: repeat(3, 1fr); }
+        .payment-grid { grid-template-columns: 1fr 1fr; }
+        .validity-grid { grid-template-columns: 1fr 1fr; }
 
-.success-icon{
+        .dark-card {
+            background: var(--panel-2);
+            border-radius: 10px;
+            padding: 16px;
+        }
 
-    font-size:80px;
+        .section-title {
+            margin: 22px 0 9px;
+            color: var(--yellow);
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--line);
+        }
 
-}
+        .label {
+            color: var(--muted);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            font-weight: 700;
+        }
 
+        .value {
+            margin-top: 4px;
+            color: var(--white);
+            font-size: 13px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
 
-.details{
+        .member-email {
+            margin-top: 16px;
+        }
 
-    background:#f8f9fa;
-    padding:25px;
-    border-radius:15px;
-    text-align:left;
+        .amount-box {
+            border-left: 1px solid var(--line);
+            padding-left: 20px;
+        }
 
-}
+        .amount {
+            color: var(--yellow);
+            font-size: 25px;
+            font-weight: 900;
+        }
 
+        .total-row {
+            grid-column: 1 / -1;
+            border-top: 1px solid var(--line);
+            padding-top: 13px;
+            margin-top: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-.details p{
+        .total-row .total-label {
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 800;
+        }
 
-    margin-bottom:12px;
+        .footer-note {
+            margin-top: 22px;
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--panel);
+            text-align: center;
+        }
 
-}
+        .footer-note strong {
+            color: var(--yellow);
+            font-size: 11px;
+        }
 
+        .footer-note div {
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 4px;
+        }
 
-.details strong{
+        .actions {
+            text-align: center;
+            margin-top: 20px;
+        }
 
-    width:170px;
-    display:inline-block;
+        .action-btn {
+            border: 0;
+            border-radius: 30px;
+            padding: 12px 20px;
+            margin: 5px;
+            font-weight: 800;
+        }
 
-}
+        .btn-yellow { background: var(--yellow); color: #111; }
+        .btn-dark { background: #151515; color: white; }
+        .btn-green { background: var(--green); color: white; }
 
+        @media (max-width: 650px) {
+            .page-wrap { padding: 15px 8px; }
+            #receiptArea { padding: 22px 17px; border-radius: 10px; }
+            .brand-row { align-items: flex-start; flex-direction: column; }
+            .receipt-title { text-align: left; }
+            .beast-strip { align-items: flex-start; flex-direction: column; }
+            .meta-grid, .member-grid, .payment-grid, .validity-grid { grid-template-columns: 1fr; }
+            .amount-box { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 14px; }
+        }
 
-.btn-home{
-
-    margin-top:20px;
-
-}
-
-
-</style>
-
-
+        @media print {
+            @page { size: A4; margin: 8mm; }
+            body { background: #fff !important; }
+            .success-top, .actions { display: none !important; }
+            .page-wrap { padding: 0; }
+            .receipt-shell { width: 100%; }
+            #receiptArea {
+                box-shadow: none;
+                border-radius: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
 </head>
-
-
-
 <body>
-
-
-
-<div class="success-card">
-
-
-
-<div class="logo">
-
-<i class="fa-solid fa-dumbbell"></i>
-
-GymMS Pro
-
-</div>
-
-
-
-
-<div class="success-icon">
-
-✅
-
-</div>
-
-
-
-
-<h2 class="text-success">
-
-Payment Successful
-
-</h2>
-
-
-
-
-<p>
-
-Your Gym Membership has been Activated Successfully.
-
-</p>
-
-
-
-<hr>
-
-
-
-
-
-<div class="details">
-
-
-<h5 class="mb-3">
-
-Payment Receipt
-
-</h5>
-
-
-
-
-<p>
-<strong>Member Name:</strong>
-<span id="memberName">-</span>
-</p>
-
-
-
-<p>
-<strong>Email:</strong>
-<span id="email">-</span>
-</p>
-
-
-
-<p>
-<strong>Plan:</strong>
-<span id="plan">-</span>
-</p>
-
-
-
-<p>
-<strong>Amount:</strong>
-₹<span id="amount">-</span>
-</p>
-
-
-
-<p>
-<strong>Payment ID:</strong>
-<span id="paymentId">-</span>
-</p>
-
-
-
-<p>
-<strong>Transaction ID:</strong>
-<span id="transactionId">-</span>
-</p>
-
-
-
-<p>
-<strong>Payment Method:</strong>
-<span id="method">Razorpay</span>
-</p>
-
-
-
-<p>
-<strong>Join Date:</strong>
-<span id="joinDate">-</span>
-</p>
-
-
-
-<p>
-<strong>Expiry Date:</strong>
-<span id="expiryDate">-</span>
-</p>
-
-
-
-</div>
-
-
-
-
-
-<p class="mt-4 text-muted">
-
-Thank you for choosing GymMS Pro.
-
-</p>
-
-
-
-
-
-<button 
-
-class="btn btn-success btn-home"
-
-onclick="goHome()">
-
-
-<i class="fa-solid fa-house"></i>
-
-Go To Home
-
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<script>
-
-
-
-const paymentData = JSON.parse(
-
-localStorage.getItem("paymentData")
-
-);
-
-
-
-if(paymentData){
-
-
-
-// Display Data
-
-
-document.getElementById("memberName").innerText =
-paymentData.name || "-";
-
-
-document.getElementById("email").innerText =
-paymentData.email || "-";
-
-
-document.getElementById("plan").innerText =
-paymentData.plan || "-";
-
-
-document.getElementById("amount").innerText =
-paymentData.amount || "-";
-
-
-document.getElementById("paymentId").innerText =
-paymentData.paymentId || "-";
-
-
-document.getElementById("transactionId").innerText =
-paymentData.transactionId || paymentData.paymentId || "-";
-
-
-document.getElementById("method").innerText =
-paymentData.paymentMethod || "Razorpay";
-
-
-document.getElementById("joinDate").innerText =
-paymentData.joinDate || "-";
-
-
-document.getElementById("expiryDate").innerText =
-paymentData.expiryDate || "-";
-
-
-
-
-// ===============================
-// SAVE PAYMENT IN DATABASE
-// ===============================
-
-
-fetch("/payments/add",{
-
-
-method:"POST",
-
-
-headers:{
-
-
-"Content-Type":"application/json"
-
-
-},
-
-
-body:JSON.stringify({
-
-
-memberName:paymentData.name,
-
-
-memberEmail:paymentData.email,
-
-
-memberPhone:paymentData.phone || "Not Provided",
-
-
-plan:paymentData.plan,
-
-
-amount:Number(paymentData.amount),
-
-
-paymentDate:new Date(),
-
-
-method:"Razorpay",
-
-
-transactionId:
-paymentData.transactionId || paymentData.paymentId || "",
-
-
-status:"Completed"
-
-
-
-})
-
-
-})
-
-
-
-.then(res=>res.json())
-
-
-.then(result=>{
-
-
-console.log(
-"PAYMENT SAVE RESPONSE:",
-result
-);
-
-
-
-if(!result.success){
-
-
-alert(
-
-"Payment Save Failed: " + result.message
-
-);
-
-
-}
-
-
-})
-
-
-
-.catch(error=>{
-
-
-console.log(
-"Payment Save Error:",
-error
-);
-
-
-});
-
-
-
-}
-
-
-
-else{
-
-
-alert("Payment data not found");
-
-
-}
-
-
-
-
-
-function goHome(){
-
-
-
-localStorage.removeItem("paymentData");
-
-
-window.location.href="/";
-
-
-}
-
-
-
-</script>
-
-
-
-
-
+    <div class="page-wrap">
+        <div class="receipt-shell">
+            <div class="success-top">
+                <div class="icon"><i class="fa-solid fa-check"></i></div>
+                <h2>Payment Successful</h2>
+                <p>Welcome to <strong>Gym Pro</strong></p>
+            </div>
+
+            <div id="receiptArea">
+                <div class="brand-row">
+                    <div class="brand">
+                        <div class="brand-icon"><i class="fa-solid fa-dumbbell"></i></div>
+                        <div>
+                            <h1>GYM PRO</h1>
+                            <small>FITNESS &amp; MEMBERSHIP</small>
+                        </div>
+                    </div>
+                    <div class="receipt-title">
+                        <h3>PAYMENT RECEIPT</h3>
+                        <small>OFFICIAL PAYMENT DOCUMENT</small>
+                    </div>
+                </div>
+
+                <div class="beast-strip">
+                    <div>
+                        <div class="beast-title">BEAST <span>MODE</span></div>
+                        <div class="beast-sub">PAYMENT RECEIVED • MEMBERSHIP ACTIVATED</div>
+                    </div>
+                    <div class="paid-badge">✓ PAYMENT SUCCESSFUL</div>
+                </div>
+
+                <div class="meta-grid">
+                    <div class="dark-card">
+                        <div class="label">Receipt Number</div>
+                        <div class="value" id="paymentId">-</div>
+                        <div class="label" style="margin-top:10px">Payment Date</div>
+                        <div class="value" id="paymentDate">-</div>
+                    </div>
+                    <div class="dark-card">
+                        <div class="label">Payment Time</div>
+                        <div class="value" id="paymentTime">-</div>
+                        <div class="label" style="margin-top:10px">Payment Status</div>
+                        <div class="value" style="color:#22c55e" id="paymentStatus">PAID</div>
+                    </div>
+                </div>
+
+                <div class="section-title">Member Details</div>
+                <div class="dark-card">
+                    <div class="member-grid">
+                        <div>
+                            <div class="label">Member Name</div>
+                            <div class="value" id="memberName">-</div>
+                        </div>
+                        <div>
+                            <div class="label">Member ID</div>
+                            <div class="value" id="memberId">-</div>
+                        </div>
+                        <div>
+                            <div class="label">Phone</div>
+                            <div class="value" id="memberPhone">-</div>
+                        </div>
+                    </div>
+                    <div class="member-email">
+                        <div class="label">Email</div>
+                        <div class="value" id="memberEmail">-</div>
+                    </div>
+                </div>
+
+                <div class="section-title">Payment Details</div>
+                <div class="dark-card">
+                    <div class="payment-grid">
+                        <div>
+                            <div class="label">Membership Plan</div>
+                            <div class="value" id="memberPlan">-</div>
+                        </div>
+                        <div class="amount-box">
+                            <div class="label">Amount Paid</div>
+                            <div class="amount" id="memberAmount">₹0.00</div>
+                        </div>
+                        <div>
+                            <div class="label">Payment Method</div>
+                            <div class="value" id="paymentMethod">Razorpay</div>
+                        </div>
+                        <div>
+                            <div class="label">Transaction ID</div>
+                            <div class="value" id="transactionId">-</div>
+                        </div>
+                        <div class="total-row">
+                            <div class="total-label">TOTAL AMOUNT PAID</div>
+                            <div class="amount" id="totalAmount">₹0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Membership Validity</div>
+                <div class="dark-card">
+                    <div class="validity-grid">
+                        <div>
+                            <div class="label">Valid From</div>
+                            <div class="value" id="joinDate">-</div>
+                        </div>
+                        <div>
+                            <div class="label">Valid Until</div>
+                            <div class="value" id="expiryDate">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-note">
+                    <strong>THANK YOU FOR CHOOSING GYM PRO</strong>
+                    <div>Train Hard • Stay Strong • Stay Consistent</div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="action-btn btn-yellow" onclick="downloadReceipt()">
+                    <i class="fa-solid fa-file-pdf"></i> Download PDF
+                </button>
+                <button class="action-btn btn-green" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> Print Receipt
+                </button>
+                <button class="action-btn btn-dark" onclick="newRegistration()">
+                    <i class="fa-solid fa-user-plus"></i> New Registration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/payment-success.js"></script>
 </body>
-
 </html>

@@ -58,47 +58,57 @@ window.addEventListener(
 
 async function loadAttendance(){
 
+    try {
 
-try{
+        const res = await fetch(`${attendanceAPI}/all`, {
+            method: "GET",
+            credentials: "same-origin",
+            cache: "no-store",
+            headers: {
+                "Accept": "application/json"
+            }
+        });
 
+        const contentType = res.headers.get("content-type") || "";
+        const rawText = await res.text();
 
-const res =
-await fetch(
-`${attendanceAPI}/all`
-);
+        let result;
 
+        if (contentType.includes("application/json")) {
+            result = JSON.parse(rawText);
+        } else {
+            throw new Error(`Attendance API returned ${res.status} ${res.statusText} instead of JSON`);
+        }
 
+        if (!res.ok || result.success === false) {
+            throw new Error(result.message || "Failed to load attendance");
+        }
 
-attendanceData =
-await res.json();
+        // Support both {success:true, attendance:[...]} and a direct array response.
+        if (Array.isArray(result)) {
+            attendanceData = result;
+        } else if (Array.isArray(result.attendance)) {
+            attendanceData = result.attendance;
+        } else if (Array.isArray(result.data)) {
+            attendanceData = result.data;
+        } else {
+            attendanceData = [];
+        }
 
+        displayAttendance(attendanceData);
+        updateStats(attendanceData);
+        createChart();
 
+    } catch (error) {
 
-displayAttendance(attendanceData);
+        console.error("Attendance Load Error:", error);
 
+        // Do not erase already displayed records if a background refresh fails.
+        if (attendanceData.length === 0) {
+            displayAttendance([]);
+        }
 
-updateStats(attendanceData);
-
-
-createChart();
-
-
-
-}
-
-
-catch(error){
-
-
-console.log(
-"Attendance Error:",
-error
-);
-
-
-}
-
-
+    }
 
 }
 
@@ -910,3 +920,208 @@ responsive:true
 
 
 }
+
+// =====================================================
+// QR ATTENDANCE SCANNER
+// =====================================================
+
+let qrScanner = null;
+let qrScannerRunning = false;
+let lastQrValue = "";
+let lastQrTime = 0;
+
+const qrStatus = document.getElementById("qrScanStatus");
+const startQrBtn = document.getElementById("startQrBtn");
+const stopQrBtn = document.getElementById("stopQrBtn");
+const manualMemberId = document.getElementById("manualMemberId");
+const manualScanBtn = document.getElementById("manualScanBtn");
+
+function setQrStatus(message, type = "") {
+    if (!qrStatus) return;
+    qrStatus.className = `qr-scan-status ${type}`;
+    qrStatus.innerHTML = message;
+}
+
+async function markAttendanceByMemberId(memberId) {
+    const cleanId = String(memberId || "").trim();
+
+    if (!cleanId) {
+        setQrStatus("Please enter a valid Member ID.", "error");
+        return;
+    }
+
+    try {
+        setQrStatus('<i class="fa-solid fa-spinner fa-spin"></i> Checking member...', "");
+
+        const response = await fetch(`${attendanceAPI}/scan`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ memberId: cleanId })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            setQrStatus(
+                `<strong>✓ ${data.member.name}</strong><br>${data.message}<br><small>Check-in: ${data.attendance.checkIn}</small>`,
+                "success"
+            );
+
+            if (manualMemberId) manualMemberId.value = "";
+
+            // Immediately show the newly created attendance record.
+            // This makes the table update even if the follow-up GET request is delayed.
+            if (data.attendance) {
+                const newRecord = data.attendance;
+                const exists = attendanceData.some(item => item._id === newRecord._id);
+
+                if (!exists) {
+                    attendanceData = [newRecord, ...attendanceData];
+                }
+
+                displayAttendance(attendanceData);
+                updateStats(attendanceData);
+                createChart();
+            }
+
+            // Then sync with the database in the background.
+            loadAttendance();
+            return true;
+        }
+
+        setQrStatus(`<strong>⚠ ${data.message}</strong>`, "error");
+        return false;
+
+    } catch (error) {
+        console.log("QR Scan Error:", error);
+        setQrStatus("Unable to connect to the server.", "error");
+        return false;
+    }
+}
+
+function extractMemberId(decodedText) {
+    const text = String(decodedText || "").trim();
+
+    // Our Gym Pro QR format: GYM_PRO|MEM001
+    if (text.startsWith("GYM_PRO|")) {
+        return text.split("|")[1]?.trim();
+    }
+
+    // Also support a plain member ID for future QR cards.
+    if (/^MEM\d+$/i.test(text)) {
+        return text.toUpperCase();
+    }
+
+    // Support JSON QR payloads if needed later.
+    try {
+        const parsed = JSON.parse(text);
+        if (parsed.memberId) return String(parsed.memberId).trim();
+    } catch (_) {}
+
+    return null;
+}
+
+async function onQrDetected(decodedText) {
+    const now = Date.now();
+
+    // Avoid repeated camera callbacks for the same QR.
+    if (decodedText === lastQrValue && now - lastQrTime < 3000) return;
+
+    lastQrValue = decodedText;
+    lastQrTime = now;
+
+    const memberId = extractMemberId(decodedText);
+
+    if (!memberId) {
+        setQrStatus("Invalid Gym Pro QR code. Please scan a member QR.", "error");
+        return;
+    }
+
+    const success = await markAttendanceByMemberId(memberId);
+
+    if (success) {
+        await stopQrScanner();
+    }
+}
+
+async function startQrScanner() {
+    if (!window.Html5Qrcode) {
+        setQrStatus("QR scanner library could not load. Use Manual Check-In.", "error");
+        return;
+    }
+
+    if (qrScannerRunning) return;
+
+    qrScanner = new Html5Qrcode("qr-reader");
+
+    try {
+        const cameras = await Html5Qrcode.getCameras();
+
+        if (!cameras || cameras.length === 0) {
+            throw new Error("No camera found");
+        }
+
+        // Prefer the back camera on phones.
+        const backCamera = cameras.find(camera =>
+            /back|rear|environment/i.test(camera.label)
+        );
+        const cameraId = (backCamera || cameras[0]).id;
+
+        await qrScanner.start(
+            cameraId,
+            {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1
+            },
+            onQrDetected,
+            () => {}
+        );
+
+        qrScannerRunning = true;
+        startQrBtn.disabled = true;
+        stopQrBtn.disabled = false;
+        setQrStatus("Camera active. Point the camera at a Gym Pro member QR code.");
+
+    } catch (error) {
+        console.log("Camera Error:", error);
+        qrScanner = null;
+        qrScannerRunning = false;
+        setQrStatus("Camera permission denied/unavailable. You can use Manual Check-In below.", "error");
+    }
+}
+
+async function stopQrScanner() {
+    if (!qrScanner) return;
+
+    try {
+        if (qrScannerRunning) {
+            await qrScanner.stop();
+        }
+        await qrScanner.clear();
+    } catch (error) {
+        console.log("Stop QR Error:", error);
+    }
+
+    qrScanner = null;
+    qrScannerRunning = false;
+
+    if (startQrBtn) startQrBtn.disabled = false;
+    if (stopQrBtn) stopQrBtn.disabled = true;
+}
+
+if (startQrBtn) startQrBtn.addEventListener("click", startQrScanner);
+if (stopQrBtn) stopQrBtn.addEventListener("click", stopQrScanner);
+if (manualScanBtn) manualScanBtn.addEventListener("click", () => markAttendanceByMemberId(manualMemberId.value));
+if (manualMemberId) {
+    manualMemberId.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            markAttendanceByMemberId(manualMemberId.value);
+        }
+    });
+}
+
+window.addEventListener("beforeunload", () => {
+    if (qrScanner) qrScanner.stop().catch(() => {});
+});

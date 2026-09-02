@@ -1,146 +1,352 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
-    const memberData = JSON.parse(localStorage.getItem("gymMember"));
+    // ==========================================
+    // GET MEMBER DATA
+    // ==========================================
+
+    const memberData = JSON.parse(
+        localStorage.getItem("gymMember")
+    );
 
     if (!memberData) {
+
         alert("Registration data not found.");
-        window.location.href = "/register";
+
+        window.location.replace("/register");
+
         return;
+
     }
 
-    // ===========================
-    // Show Member Details
-    // ===========================
+    // ==========================================
+    // SHOW MEMBER DETAILS
+    // ==========================================
 
-    document.getElementById("name").innerText = memberData.name;
-    document.getElementById("email").innerText = memberData.email;
-    document.getElementById("plan").innerText = memberData.plan;
-    document.getElementById("amount").innerText = "₹" + memberData.amount;
+    document.getElementById("name").innerText =
+        memberData.name || "-";
+
+    document.getElementById("email").innerText =
+        memberData.email || "-";
+
+    document.getElementById("plan").innerText =
+        memberData.plan || "-";
+
+    document.getElementById("amount").innerText =
+        "₹" +
+        Number(memberData.amount || 0)
+            .toLocaleString("en-IN");
 
     const amount = Number(memberData.amount);
 
-    // ===========================
-    // Pay Button
-    // ===========================
+    if (!Number.isFinite(amount) || amount <= 0) {
 
-    document.getElementById("payButton").addEventListener("click", function () {
+        alert("Invalid payment amount");
 
-        const options = {
+        return;
 
-            key: "rzp_live_THJJ0lbmFICoWk",
+    }
 
-            amount: amount * 100,
+    const payButton =
+        document.getElementById("payButton");
 
-            currency: "INR",
+    // ==========================================
+    // GET PUBLIC RAZORPAY KEY
+    // ==========================================
 
-            name: "GymMS Pro",
+    let razorpayKey = null;
 
-            description: "Gym Membership Payment",
+    try {
 
-            handler: async function (response) {
+        const configResponse =
+            await fetch("/payment/config");
 
-                try {
+        const config =
+            await configResponse.json();
 
-                    const payment = {
+        if (!config.success || !config.keyId) {
 
-                        memberName: memberData.name,
+            throw new Error(
+                "Razorpay key is not configured on the server."
+            );
 
-                        memberEmail: memberData.email,
+        }
 
-                        memberPhone: memberData.phone,
+        razorpayKey = config.keyId;
 
-                        memberId: memberData._id,
+    } catch (error) {
 
-                        amount: amount,
+        console.error(
+            "RAZORPAY CONFIG ERROR:",
+            error
+        );
 
-                        paymentDate: new Date(),
+        payButton.disabled = true;
 
-                        method: "Razorpay",
+        payButton.innerHTML =
+            '<i class="fa-solid fa-circle-exclamation"></i> Payment Unavailable';
 
-                        status: "Completed",
+        alert(
+            "Payment service is temporarily unavailable."
+        );
 
-                        transactionId: response.razorpay_payment_id
+        return;
 
-                    };
+    }
 
-                    const save = await fetch("/payments/add", {
+    // ==========================================
+    // PAYMENT BUTTON
+    // ==========================================
 
-                        method: "POST",
+    payButton.addEventListener("click", async () => {
 
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
+        try {
 
-                        body: JSON.stringify(payment)
+            payButton.disabled = true;
 
-                    });
+            payButton.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-2"></span> Opening Payment...';
 
-                    const result = await save.json();
+            // ==========================================
+            // CREATE ORDER
+            // ==========================================
 
-                    if (!result.success) {
-                        alert(result.message);
-                        return;
-                    }
-
-                    localStorage.setItem("paymentData", JSON.stringify({
-
-                        name: memberData.name,
-
-                        email: memberData.email,
-
-                        phone: memberData.phone,
-
-                        plan: memberData.plan,
-
-                        amount: amount,
-
-                        paymentId: response.razorpay_payment_id,
-
-                        paymentMethod: "Razorpay",
-
-                        joinDate: memberData.joinDate,
-
-                        expiryDate: memberData.expiryDate
-
-                    }));
-
-                    alert("Payment Successful");
-
-                    window.location.href = "/payment-success";
-
+            const orderResponse = await fetch(
+                "/payment/create-order",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        amount: amount
+                    })
                 }
+            );
 
-                catch (err) {
+            const order = await orderResponse.json();
 
-                    console.log(err);
+            console.log(
+                "ORDER RESPONSE:",
+                order
+            );
 
-                    alert("Payment Save Failed");
+            if (!order.success) {
 
-                }
-
-            },
-
-            prefill: {
-
-                name: memberData.name,
-
-                email: memberData.email,
-
-                contact: memberData.phone
-
-            },
-
-            theme: {
-
-                color: "#ffc107"
+                throw new Error(
+                    order.message ||
+                    "Unable to create payment order"
+                );
 
             }
 
-        };
+            // ==========================================
+            // RAZORPAY OPTIONS
+            // ==========================================
 
-        const rzp = new Razorpay(options);
+            const options = {
 
-        rzp.open();
+                key: razorpayKey,
+
+                order_id: order.order.id,
+
+                amount: order.order.amount,
+
+                currency: order.order.currency || "INR",
+
+                name: "Gym Pro",
+
+                description: "Gym Membership Payment",
+
+                prefill: {
+
+                    name: memberData.name,
+
+                    email: memberData.email,
+
+                    contact: memberData.phone
+
+                },
+
+                notes: {
+
+                    plan: memberData.plan,
+
+                    memberEmail: memberData.email
+
+                },
+
+                theme: {
+
+                    color: "#ffc107"
+
+                },
+
+                handler: async function (response) {
+
+                    try {
+
+                        console.log(
+                            "RAZORPAY RESPONSE:",
+                            response
+                        );
+
+                        payButton.innerHTML =
+                            '<span class="spinner-border spinner-border-sm me-2"></span> Verifying Payment...';
+
+                        // ==========================================
+                        // VERIFY PAYMENT
+                        // ==========================================
+
+                        const verifyResponse =
+                            await fetch(
+                                "/payment/verify",
+                                {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type":
+                                            "application/json"
+                                    },
+                                    body: JSON.stringify({
+
+                                        paymentResponse:
+                                            response,
+
+                                        memberData:
+                                            memberData
+
+                                    })
+                                }
+                            );
+
+                        const result =
+                            await verifyResponse.json();
+
+                        console.log(
+                            "VERIFY RESULT:",
+                            result
+                        );
+
+                        if (!result.success) {
+
+                            throw new Error(
+                                result.message ||
+                                "Payment verification failed"
+                            );
+
+                        }
+
+                        // ==========================================
+                        // SAVE DATA FOR RECEIPT PAGE
+                        // ==========================================
+
+                        localStorage.setItem(
+                            "paymentData",
+                            JSON.stringify({
+
+                                member:
+                                    result.member,
+
+                                paymentId:
+                                    result.paymentId,
+
+                                razorpayPaymentId:
+                                    result.razorpayPaymentId,
+
+                                receiptUrl:
+                                    result.receiptUrl,
+
+                                paymentMethod:
+                                    "Razorpay",
+
+                                paymentStatus:
+                                    result.paymentStatus || "Paid",
+
+                                paymentDate:
+                                    result.paymentDate,
+
+                                amount:
+                                    result.amount,
+
+                                plan:
+                                    result.plan
+
+                            })
+                        );
+
+                        // No success alert here.
+                        // Go directly to the receipt page.
+                        window.location.replace(
+                            "/payment-success?autoprint=1"
+                        );
+
+                    } catch (error) {
+
+                        console.error(
+                            "VERIFY ERROR:",
+                            error
+                        );
+
+                        payButton.disabled = false;
+
+                        payButton.innerHTML =
+                            '<i class="fa-solid fa-lock"></i> Pay Now';
+
+                        alert(
+                            error.message ||
+                            "Payment verification failed"
+                        );
+
+                    }
+
+                }
+
+            };
+
+            const razorpay =
+                new Razorpay(options);
+
+            razorpay.open();
+
+            razorpay.on(
+                "payment.failed",
+                function (response) {
+
+                    console.error(
+                        "PAYMENT FAILED:",
+                        response
+                    );
+
+                    payButton.disabled = false;
+
+                    payButton.innerHTML =
+                        '<i class="fa-solid fa-lock"></i> Pay Now';
+
+                    alert(
+                        response.error?.description ||
+                        "Payment Failed"
+                    );
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "PAYMENT ERROR:",
+                error
+            );
+
+            payButton.disabled = false;
+
+            payButton.innerHTML =
+                '<i class="fa-solid fa-lock"></i> Pay Now';
+
+            alert(
+                error.message ||
+                "Unable to start payment"
+            );
+
+        }
 
     });
 

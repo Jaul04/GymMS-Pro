@@ -19,19 +19,12 @@ const adminSchema = new mongoose.Schema({
     password:{
         type:String,
         required:true
-    },
-
-
-    createdAt:{
-        type:Date,
-        default:Date.now
     }
 
 
+},{
+    timestamps:true
 });
 
 
-module.exports = mongoose.model(
-    "Admin",
-    adminSchema
-);
+module.exports = mongoose.model("Admin",adminSchema);

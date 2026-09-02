@@ -1,0 +1,931 @@
+/* ======================================
+   PAYMENT MANAGEMENT PAGE
+   GymMS Pro
+====================================== */
+
+
+.payment-management-title h2{
+
+    font-weight:700;
+
+}
+
+
+.payment-management-title p{
+
+    color:#6b7280;
+
+}
+
+
+
+
+
+/* ======================================
+   STAT CARDS
+====================================== */
+
+
+.stat-card{
+
+    background:#fff;
+
+    border-radius:20px;
+
+    padding:25px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+    transition:.35s ease;
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+
+
+
+.stat-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:0;
+
+    width:6px;
+
+    height:100%;
+
+    background:#f4b400;
+
+}
+
+
+
+
+.stat-card:hover{
+
+    transform:translateY(-8px);
+
+}
+
+
+
+
+.stat-card h6{
+
+    color:#6b7280;
+
+    font-weight:500;
+
+    margin-bottom:10px;
+
+}
+
+
+
+.stat-card h2{
+
+    font-size:32px;
+
+    font-weight:700;
+
+    margin:0;
+
+}
+
+
+
+.stat-card i{
+
+    font-size:45px;
+
+    color:#f4b400;
+
+}
+
+
+
+
+
+/* ======================================
+ SEARCH CARD
+====================================== */
+
+
+.search-card{
+
+    border:none;
+
+    border-radius:18px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+}
+
+
+
+.search-card .form-control,
+.search-card .form-select{
+
+
+    height:48px;
+
+    border-radius:12px;
+
+    border:1px solid #e5e7eb;
+
+
+}
+
+
+
+.search-card .form-control:focus,
+.search-card .form-select:focus{
+
+
+    border-color:#f4b400;
+
+    box-shadow:0 0 0 .25rem rgba(244,180,0,.20);
+
+
+}
+
+
+
+
+
+/* ======================================
+ BUTTONS
+====================================== */
+
+
+.btn-warning{
+
+
+    background:#f4b400;
+
+    border:none;
+
+    color:#111827;
+
+    font-weight:600;
+
+
+}
+
+
+
+.btn-warning:hover{
+
+
+    background:#d89b00;
+
+    color:#fff;
+
+
+}
+
+
+
+#exportExcel,
+#exportPDF,
+.btn-dark{
+
+
+    padding:10px 18px;
+
+    border-radius:12px;
+
+    font-weight:600;
+
+
+}
+/* ======================================
+   PAYMENT TABLE
+====================================== */
+
+
+.table-card{
+
+    border:none;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+}
+
+
+
+.table-card .card-header{
+
+    background:#fff;
+
+    padding:20px 25px;
+
+    border-bottom:1px solid #e5e7eb;
+
+}
+
+
+
+.table-card .card-header h5{
+
+    margin:0;
+
+    font-weight:700;
+
+}
+
+
+
+
+.table{
+
+    margin-bottom:0;
+
+}
+
+
+
+.table thead{
+
+
+    background:#111827;
+
+    color:#fff;
+
+
+}
+
+
+
+.table thead th{
+
+
+    padding:16px;
+
+    border:none;
+
+    font-size:14px;
+
+
+}
+
+
+
+
+.table tbody td{
+
+
+    padding:15px;
+
+    vertical-align:middle;
+
+
+}
+
+
+
+
+.table tbody tr{
+
+
+    transition:.3s;
+
+
+}
+
+
+
+
+.table tbody tr:hover{
+
+
+    background:#fff8e1;
+
+
+}
+
+
+
+
+
+
+
+/* ======================================
+ STATUS BADGE
+====================================== */
+
+
+.badge{
+
+
+    padding:8px 14px;
+
+    border-radius:30px;
+
+    font-size:13px;
+
+
+}
+
+
+
+
+
+
+
+/* ======================================
+ ACTION BUTTONS
+====================================== */
+
+
+.action-btn{
+
+
+    width:35px;
+
+    height:35px;
+
+    border-radius:50%;
+
+    border:none;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin-right:5px;
+
+    transition:.3s;
+
+
+}
+
+
+
+.action-view{
+
+
+    background:#dbeafe;
+
+    color:#2563eb;
+
+
+}
+
+
+
+.action-edit{
+
+
+    background:#fef3c7;
+
+    color:#d97706;
+
+
+}
+
+
+
+.action-delete{
+
+
+    background:#fee2e2;
+
+    color:#dc2626;
+
+
+}
+
+
+
+.action-receipt{
+
+
+    background:#dcfce7;
+
+    color:#16a34a;
+
+
+}
+
+
+
+.action-btn:hover{
+
+
+    transform:scale(1.15);
+
+
+}
+
+
+
+
+
+
+
+/* ======================================
+ MODAL DESIGN
+====================================== */
+
+
+.modal-content{
+
+
+    border:none;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+
+}
+
+
+
+.modal-header{
+
+
+    background:#111827;
+
+    color:#fff;
+
+    padding:20px;
+
+
+}
+
+
+
+.modal-header .btn-close{
+
+
+    filter:invert(1);
+
+
+}
+
+
+
+.modal-body{
+
+
+    padding:30px;
+
+
+}
+
+
+
+.form-label{
+
+
+    font-weight:600;
+
+
+}
+
+
+
+.form-control,
+.form-select{
+
+
+    border-radius:12px;
+
+    height:48px;
+
+
+}
+
+
+
+.form-control:focus,
+.form-select:focus{
+
+
+    border-color:#f4b400;
+
+    box-shadow:0 0 0 .25rem rgba(244,180,0,.20);
+
+
+}
+
+
+
+
+
+
+
+/* ======================================
+ FOOTER
+====================================== */
+
+
+.footer{
+
+
+    background:#fff;
+
+    padding:18px 25px;
+
+    border-radius:18px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+    display:flex;
+
+    justify-content:space-between;
+
+    color:#6b7280;
+
+
+}
+
+
+
+
+
+
+
+
+/* ======================================
+ MOBILE RESPONSIVE
+====================================== */
+
+
+
+@media(max-width:992px){
+
+
+.main{
+
+    margin-left:0;
+
+    width:100%;
+
+}
+
+
+
+.sidebar{
+
+    position:relative;
+
+    width:100%;
+
+    height:auto;
+
+}
+
+
+
+.wrapper{
+
+    flex-direction:column;
+
+}
+
+
+
+.export-buttons{
+
+    text-align:left!important;
+
+}
+
+
+}
+
+
+
+
+
+
+
+@media(max-width:768px){
+
+
+
+.table{
+
+    min-width:900px;
+
+}
+
+
+
+.card-body{
+
+    overflow-x:auto;
+
+}
+
+
+
+.stat-card{
+
+    margin-bottom:15px;
+
+}
+
+
+
+.footer{
+
+
+    flex-direction:column;
+
+    gap:10px;
+
+    text-align:center;
+
+
+}
+
+
+
+}
+
+
+
+@media(max-width:576px){
+
+
+
+.main{
+
+    padding:15px;
+
+}
+
+
+
+.stat-card h2{
+
+    font-size:25px;
+
+}
+
+
+
+.modal-body{
+
+    padding:20px;
+
+}
+
+
+
+}
+@media print{
+
+
+body *{
+
+visibility:hidden;
+
+}
+
+
+
+#printArea,
+#printArea *{
+
+visibility:visible;
+
+}
+
+
+
+#printArea{
+
+display:block !important;
+
+position:absolute;
+
+top:20px;
+
+left:20px;
+
+width:90%;
+
+}
+
+
+
+}
+/* ===============================
+   PAYMENT RECEIPT DESIGN
+================================*/
+
+
+.receipt-box{
+
+
+    width:750px;
+
+    background:white;
+
+    padding:40px;
+
+    border-radius:20px;
+
+    box-shadow:0 15px 40px rgba(0,0,0,.15);
+
+}
+
+
+
+.receipt-header{
+
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+
+
+.receipt-header h1{
+
+
+    color:#f4b400;
+
+    font-weight:700;
+
+}
+
+
+
+.receipt-header p{
+
+
+    color:#777;
+
+}
+
+
+
+.receipt-title{
+
+
+    text-align:right;
+
+}
+
+
+
+.receipt-title h2{
+
+
+    font-size:24px;
+
+    font-weight:700;
+
+}
+
+
+
+.receipt-title span{
+
+
+    color:#777;
+
+}
+
+
+
+
+.receipt-details{
+
+
+    display:flex;
+
+    justify-content:space-between;
+
+    margin:25px 0;
+
+}
+
+
+
+.receipt-details label{
+
+
+    color:#777;
+
+    font-size:14px;
+
+}
+
+
+
+.receipt-details h5{
+
+
+    margin-top:5px;
+
+    font-weight:600;
+
+}
+
+
+
+
+
+.receipt-table{
+
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:20px;
+
+}
+
+
+
+.receipt-table th{
+
+
+    background:#111827;
+
+    color:white;
+
+    padding:15px;
+
+}
+
+
+
+.receipt-table td{
+
+
+    padding:15px;
+
+    border-bottom:1px solid #ddd;
+
+    font-size:16px;
+
+}
+
+
+
+.receipt-footer{
+
+
+    margin-top:30px;
+
+    text-align:right;
+
+}
+
+
+
+.receipt-footer h4{
+
+
+    margin-top:30px;
+
+    color:#f4b400;
+
+}
+
+
+
+@media print{
+
+
+.receipt-box{
+
+
+    box-shadow:none;
+
+}
+
+
+}

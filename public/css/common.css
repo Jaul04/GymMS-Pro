@@ -1,0 +1,102 @@
+/* ==========================================================
+   GYM PRO - COMMON RESPONSIVE SYSTEM
+   One common file for all admin/dashboard pages.
+   Desktop: sidebar | Mobile: hamburger + slide-out sidebar
+   ========================================================== */
+
+:root{--gp-sidebar-width:270px;--gp-mobile-sidebar:280px;--gp-nav-z:10000;}
+
+html,body{width:100%;max-width:100%;overflow-x:hidden;}
+*,*::before,*::after{box-sizing:border-box;}
+
+/* ---------- Desktop ---------- */
+@media (min-width:992px){
+  .mobile-menu-btn{display:none!important;}
+  .sidebar-overlay{display:none!important;}
+  .sidebar{position:fixed!important;left:0!important;top:0!important;bottom:0!important;transform:none!important;z-index:9999!important;}
+  .main{margin-left:var(--gp-sidebar-width)!important;width:calc(100% - var(--gp-sidebar-width))!important;}
+}
+
+/* ---------- Mobile / Tablet ---------- */
+@media (max-width:991.98px){
+  body{overflow-x:hidden;}
+  .wrapper{display:block!important;width:100%!important;min-height:100vh;}
+
+  .sidebar{
+    position:fixed!important;left:0!important;top:0!important;bottom:0!important;
+    width:var(--gp-mobile-sidebar)!important;max-width:88vw!important;height:100vh!important;
+    z-index:var(--gp-nav-z)!important;overflow-y:auto!important;overflow-x:hidden!important;
+    transform:translateX(-105%)!important;transition:transform .28s ease!important;
+    box-shadow:10px 0 35px rgba(0,0,0,.28)!important;
+  }
+  body.gp-menu-open .sidebar{transform:translateX(0)!important;}
+
+  .sidebar-overlay{
+    display:block!important;position:fixed!important;inset:0!important;
+    z-index:calc(var(--gp-nav-z) - 1)!important;background:rgba(0,0,0,.52)!important;
+    opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility .25s ease;
+  }
+  body.gp-menu-open .sidebar-overlay{opacity:1;visibility:visible;pointer-events:auto;}
+
+  .main{width:100%!important;margin-left:0!important;padding:16px!important;min-width:0!important;}
+
+  .topbar{
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    display:flex!important;align-items:center!important;gap:10px!important;flex-wrap:wrap!important;
+  }
+
+  .mobile-menu-btn{
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    width:42px!important;height:42px!important;min-width:42px!important;flex:0 0 42px!important;
+    border:0!important;border-radius:10px!important;background:#f4b400!important;color:#111827!important;
+    font-size:22px!important;line-height:1!important;padding:0!important;margin:0!important;
+    cursor:pointer!important;box-shadow:0 5px 15px rgba(0,0,0,.14)!important;
+    order:-1!important;z-index:2!important;
+  }
+  .mobile-menu-btn:active{transform:scale(.96);}
+
+  .topbar>.left,.topbar>div:first-child{min-width:0!important;max-width:100%;}
+  .topbar h1,.topbar h2,.topbar h3{max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+  .topbar .right{min-width:0!important;max-width:100%!important;}
+  .search-box,.search-box input{max-width:100%!important;}
+
+  /* Every sidebar item stays visible inside the drawer */
+  .sidebar .menu{display:block!important;width:100%!important;list-style:none!important;margin:0!important;padding:0!important;}
+  .sidebar .menu li{display:block!important;width:100%!important;margin:0 0 7px!important;}
+  .sidebar .menu li a,.sidebar .logout a{
+    display:flex!important;align-items:center!important;width:100%!important;min-height:46px!important;
+    padding:11px 14px!important;gap:12px!important;text-decoration:none!important;white-space:nowrap!important;
+  }
+  .sidebar .menu li a i,.sidebar .logout a i{flex:0 0 24px!important;width:24px!important;text-align:center!important;}
+
+  .row{max-width:100%!important;}
+  .card,.stat-card,.dashboard-box,.quick-card,.content-card{max-width:100%!important;}
+  img,video,canvas,iframe{max-width:100%;}
+  input,select,textarea,button{max-width:100%;}
+
+  .table-responsive,.table-wrapper,.table-container{width:100%!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}
+  table{min-width:620px;}
+
+  .modal-dialog{max-width:calc(100vw - 24px)!important;margin:12px auto!important;}
+}
+
+@media (max-width:767.98px){
+  .main{padding:12px!important;}
+  .topbar{padding:10px 12px!important;border-radius:14px!important;}
+  .topbar .right{width:100%!important;}
+  .topbar .search-box{width:100%!important;}
+  .topbar h1,.topbar h2,.topbar h3{font-size:18px!important;margin:0!important;}
+  .topbar p{font-size:12px!important;}
+  .card-body{padding:14px!important;}
+  .btn{min-height:42px;}
+  .form-control,.form-select{min-height:42px;}
+  .sidebar{padding:18px 14px!important;}
+}
+
+@media (max-width:575.98px){
+  .main{padding:9px!important;}
+  .mobile-menu-btn{width:40px!important;height:40px!important;min-width:40px!important;flex-basis:40px!important;}
+  .topbar{padding:9px 10px!important;}
+  .topbar h1,.topbar h2,.topbar h3{font-size:17px!important;}
+  table{min-width:580px;}
+}

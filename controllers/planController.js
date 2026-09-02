@@ -2,7 +2,7 @@ const Plan = require("../models/Plan");
 
 
 
-// Add Plan
+
 
 exports.addPlan = async(req,res)=>{
 
@@ -55,7 +55,7 @@ exports.addPlan = async(req,res)=>{
 
 
 
-// Get Plans
+
 
 exports.getPlans = async(req,res)=>{
 

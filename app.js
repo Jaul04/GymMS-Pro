@@ -7,18 +7,21 @@ const session = require("express-session");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 
-
-// Middleware
+// ==========================================
+// MIDDLEWARE
+// ==========================================
 
 const authMiddleware = require("./middleware/auth");
 
-
-// Model
+// ==========================================
+// MODEL
+// ==========================================
 
 const Admin = require("./models/Admin");
 
-
-// Routes
+// ==========================================
+// ROUTES
+// ==========================================
 
 const memberRoutes = require("./routes/memberRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
@@ -29,93 +32,71 @@ const reminderRoutes = require("./routes/reminderRoutes");
 const trainerRoutes = require("./routes/trainerRoutes");
 const planRoutes = require("./routes/planRoutes");
 
-
+// ==========================================
+// APP
+// ==========================================
 
 const app = express();
 
-
-
-
-// Body Parser
+// ==========================================
+// BODY PARSER
+// ==========================================
 
 app.use(
     bodyParser.urlencoded({
-        extended:true
+        extended: true
     })
 );
-
 
 app.use(bodyParser.json());
 
-
-
-
-// Static Folder
+// ==========================================
+// STATIC FOLDER
+// ==========================================
 
 app.use(
     express.static(
-        path.join(__dirname,"public")
+        path.join(__dirname, "public")
     )
 );
 
-
-
-
-
-// Session
+// ==========================================
+// SESSION
+// ==========================================
 
 app.use(
     session({
-
-        secret:process.env.SESSION_SECRET,
-
-        resave:false,
-
-        saveUninitialized:false
-
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false
     })
 );
 
-
-
-
-
-
-
-// MongoDB
+// ==========================================
+// MONGODB
+// ==========================================
 
 mongoose
-.connect(process.env.MONGO_URI)
+    .connect(process.env.MONGO_URI)
+    .then(() => {
+        console.log("✅ MongoDB Connected");
+    })
+    .catch((err) => {
+        console.log(
+            "❌ MongoDB Error:",
+            err
+        );
+    });
 
-.then(()=>{
-
-    console.log("✅ MongoDB Connected");
-
-})
-
-.catch((err)=>{
-
-    console.log(
-        "❌ MongoDB Error:",
-        err
-    );
-
-});
-
-
-
-
-
-
-
-
-
-// =========================
+// ==========================================================
 // PAGE ROUTES
-// =========================
+// ==========================================================
 
+// ==========================================
+// HOME PAGE
+// ==========================================
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
 
     res.sendFile(
         path.join(
@@ -128,12 +109,35 @@ app.get("/",(req,res)=>{
 
 });
 
+// ==========================================
+// PAYMENTS MANAGEMENT PAGE
+// ==========================================
+// IMPORTANT:
+// Actual file name is payment-management.html
+// NOT payments.html
 
+app.get(
+    "/payment-management",
+    authMiddleware,
+    (req, res) => {
 
+        res.sendFile(
+            path.join(
+                __dirname,
+                "public",
+                "views",
+                "payment-management.html"
+            )
+        );
 
+    }
+);
 
+// ==========================================
+// LOGIN PAGE
+// ==========================================
 
-app.get("/login",(req,res)=>{
+app.get("/login", (req, res) => {
 
     res.sendFile(
         path.join(
@@ -146,13 +150,11 @@ app.get("/login",(req,res)=>{
 
 });
 
+// ==========================================
+// REGISTER PAGE
+// ==========================================
 
-
-
-
-
-
-app.get("/register",(req,res)=>{
+app.get("/register", (req, res) => {
 
     res.sendFile(
         path.join(
@@ -165,14 +167,11 @@ app.get("/register",(req,res)=>{
 
 });
 
+// ==========================================
+// ONLINE PAYMENT PAGE
+// ==========================================
 
-
-
-
-
-
-
-app.get("/online-payment",(req,res)=>{
+app.get("/online-payment", (req, res) => {
 
     res.sendFile(
         path.join(
@@ -185,198 +184,141 @@ app.get("/online-payment",(req,res)=>{
 
 });
 
+// ==========================================
+// PAYMENT SUCCESS PAGE
+// ==========================================
 
-
-
-
-
-
-app.get("/payment-success",(req,res)=>{
-
+app.get("/payment-success", (req, res) => {
 
     res.sendFile(
-
         path.join(
             __dirname,
             "public",
             "views",
             "payment-success.html"
         )
-
     );
-
 
 });
 
-
-
-
-
-
-
-
-
-
-
-// =========================
+// ==========================================================
 // ADMIN LOGIN
-// =========================
+// ==========================================================
 
-
-app.post("/login",async(req,res)=>{
-
+app.post("/login", async (req, res) => {
 
     const {
         email,
         password
     } = req.body;
 
-
-
-    try{
-
+    try {
 
         const admin =
-        await Admin.findOne({
-            email
-        });
+            await Admin.findOne({
+                email
+            });
 
+        // --------------------------------------
+        // ADMIN NOT FOUND
+        // --------------------------------------
 
-
-
-        if(!admin){
+        if (!admin) {
 
             return res.json({
-
-                success:false,
-
-                message:"Invalid Email or Password"
-
+                success: false,
+                message: "Invalid Email or Password"
             });
 
         }
 
-
-
-
+        // --------------------------------------
+        // PASSWORD CHECK
+        // --------------------------------------
 
         const match =
-        await bcrypt.compare(
-            password,
-            admin.password
-        );
+            await bcrypt.compare(
+                password,
+                admin.password
+            );
 
-
-
-
-
-        if(!match){
+        if (!match) {
 
             return res.json({
-
-                success:false,
-
-                message:"Invalid Email or Password"
-
+                success: false,
+                message: "Invalid Email or Password"
             });
 
         }
 
+        // --------------------------------------
+        // CREATE SESSION
+        // --------------------------------------
 
-
-
-
-        req.session.admin=true;
+        req.session.admin = true;
 
         req.session.adminId =
-        admin._id;
+            admin._id;
 
-
-
+        // --------------------------------------
+        // LOGIN SUCCESS
+        // --------------------------------------
 
         res.json({
-
-            success:true,
-
-            message:"Login Successful"
-
+            success: true,
+            message: "Login Successful"
         });
-
-
 
     }
 
-    catch(error){
-
+    catch (error) {
 
         console.log(error);
 
-
         res.json({
-
-            success:false,
-
-            message:"Server Error"
-
+            success: false,
+            message: "Server Error"
         });
-
 
     }
 
-
 });
 
+// ==========================================================
+// LOGOUT
+// ==========================================================
 
+app.get("/logout", (req, res) => {
 
-
-
-
-
-
-
-
-
-// Logout
-
-
-app.get("/logout",(req,res)=>{
-
-
-    req.session.destroy(()=>{
+    req.session.destroy(() => {
 
         res.redirect("/login");
 
     });
 
-
 });
 
-
-
-
-
-
-
-
-
-// =========================
+// ==========================================================
 // API ROUTES
-// =========================
+// ==========================================================
 
-
-
-// Members
+// ==========================================
+// MEMBERS
+// ==========================================
 
 app.use(
     "/members",
     memberRoutes
 );
 
-
-
-
-
-// Payments
+// ==========================================
+// PAYMENTS
+// ==========================================
+// These are PAYMENT APIs.
+// Example:
+// /payments/all
+// /payments/add
+// /payments/receipt/:id
 
 app.use(
     "/payments",
@@ -384,22 +326,21 @@ app.use(
     paymentRoutes
 );
 
-
-
-
-
-// Payment Gateway
+// ==========================================
+// RAZORPAY PAYMENT GATEWAY
+// ==========================================
+// Example:
+// /payment/create-order
+// /payment/verify
 
 app.use(
     "/payment",
     paymentGatewayRoutes
 );
 
-
-
-
-
-// Attendance
+// ==========================================
+// ATTENDANCE
+// ==========================================
 
 app.use(
     "/attendance",
@@ -407,11 +348,9 @@ app.use(
     attendanceRoutes
 );
 
-
-
-
-
-// Dashboard
+// ==========================================
+// DASHBOARD
+// ==========================================
 
 app.use(
     "/dashboard",
@@ -419,233 +358,154 @@ app.use(
     dashboardRoutes
 );
 
-
-
-
-
-
-// Trainer API
+// ==========================================
+// TRAINER API
+// ==========================================
 
 app.use(
     "/trainers",
     trainerRoutes
 );
 
-
-
-
-
-
-
-// Plan API
+// ==========================================
+// PLAN API
+// ==========================================
 
 app.use(
     "/plans",
     planRoutes
 );
 
-
-
-
-
-
-
-
-// Reminder
+// ==========================================
+// REMINDER
+// ==========================================
 
 app.use(
     "/",
     reminderRoutes
 );
 
-
-
-
-
-
-
-
-
-
-// =========================
+// ==========================================================
 // TRAINER PAGE
-// =========================
-
+// ==========================================================
 
 app.get(
-"/trainer",
-authMiddleware,
-(req,res)=>{
+    "/trainer",
+    authMiddleware,
+    (req, res) => {
 
+        res.sendFile(
+            path.join(
+                __dirname,
+                "public",
+                "views",
+                "trainer.html"
+            )
+        );
 
-    res.sendFile(
+    }
+);
 
-        path.join(
-
-            __dirname,
-
-            "public",
-
-            "views",
-
-            "trainer.html"
-
-        )
-
-    );
-
-
-});
-
-
-
-
-
-
-
-
-
-
-
-// =========================
+// ==========================================================
 // PLANS PAGE
-// =========================
-
+// ==========================================================
 
 app.get(
-"/plans-management",
-authMiddleware,
-(req,res)=>{
+    "/plans-management",
+    authMiddleware,
+    (req, res) => {
 
+        res.sendFile(
+            path.join(
+                __dirname,
+                "public",
+                "views",
+                "plans.html"
+            )
+        );
 
-    res.sendFile(
+    }
+);
 
-        path.join(
-
-            __dirname,
-
-            "public",
-
-            "views",
-
-            "plans.html"
-
-        )
-
-    );
-
-
-});
-
-
-
-
-
-
-
-
-
-
-
-
-// =========================
+// ==========================================================
 // ADMIN PROFILE
-// =========================
-
+// ==========================================================
 
 app.get(
-"/admin-profile",
-authMiddleware,
-async(req,res)=>{
+    "/admin-profile",
+    authMiddleware,
+    async (req, res) => {
 
+        try {
 
-    try{
+            const admin =
+                await Admin.findById(
+                    req.session.adminId
+                ).select("-password");
 
+            // --------------------------------------
+            // ADMIN NOT FOUND
+            // --------------------------------------
 
-        const admin =
+            if (!admin) {
 
-        await Admin.findById(
-            req.session.adminId
-        )
-        .select("-password");
+                return res.json({
+                    success: false,
+                    message: "Admin not found"
+                });
 
+            }
 
+            // --------------------------------------
+            // SUCCESS
+            // --------------------------------------
 
-
-
-        if(!admin){
-
-            return res.json({
-
-                success:false,
-
-                message:"Admin not found"
-
+            res.json({
+                success: true,
+                admin
             });
 
         }
 
+        catch (error) {
 
+            console.log(error);
 
+            res.json({
+                success: false,
+                message: "Server Error"
+            });
 
-
-        res.json({
-
-            success:true,
-
-            admin
-
-        });
-
-
+        }
 
     }
+);
 
-    catch(error){
-
-
-        console.log(error);
-
-
-        res.json({
-
-            success:false,
-
-            message:"Server Error"
-
-        });
-
-
-    }
-
-
-});
-
-
-
-
-
-
-
-
-
-
-
-
+// ==========================================================
 // SERVER
-
+// ==========================================================
 
 const PORT =
-process.env.PORT || 8000;
+    process.env.PORT || 8000;
 
+// ==========================================================
+// START SERVER
+// ==========================================================
+// 0.0.0.0 allows the website to be accessed
+// from other devices on the same network.
 
+app.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
 
-app.listen(PORT,()=>{
+        console.log(
+            `🚀 Server Running on Port ${PORT}`
+        );
 
+        console.log(
+            `📱 Mobile Access: http://10.84.208.77:${PORT}`
+        );
 
-    console.log(
-        `🚀 Server Running on Port ${PORT}`
-    );
-
-
-});
+    }
+);

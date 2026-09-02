@@ -179,6 +179,15 @@ async function loadMembers() {
                     </button>
 
                     <button
+                        class="action-btn"
+                        title="Member QR"
+                        onclick="showMemberQR('${member.memberId}', '${String(member.name).replace("'", "\\'")}')">
+
+                        <i class="fa-solid fa-qrcode"></i>
+
+                    </button>
+
+                    <button
                         class="action-btn delete-btn"
                         onclick="deleteMember('${member._id}')">
 
@@ -539,6 +548,15 @@ async function searchMember() {
                     </button>
 
                     <button
+                        class="action-btn"
+                        title="Member QR"
+                        onclick="showMemberQR('${member.memberId}', '${String(member.name).replace("'", "\\'")}')">
+
+                        <i class="fa-solid fa-qrcode"></i>
+
+                    </button>
+
+                    <button
                         class="action-btn delete-btn"
                         onclick="deleteMember('${member._id}')">
 
@@ -562,4 +580,60 @@ async function searchMember() {
 
     }
 
+}
+
+// ==========================
+// MEMBER QR CODE
+// ==========================
+
+function showMemberQR(memberId, memberName) {
+
+    const qrBox = document.getElementById("memberQrCode");
+    qrBox.innerHTML = "";
+
+    document.getElementById("qrMemberName").textContent = memberName;
+    document.getElementById("qrMemberId").textContent = memberId;
+
+    const payload = `GYM_PRO|${memberId}`;
+
+    new QRCode(qrBox, {
+        text: payload,
+        width: 240,
+        height: 240,
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    new bootstrap.Modal(document.getElementById("memberQrModal")).show();
+}
+
+function printMemberQR() {
+
+    const qrBox = document.getElementById("memberQrCode");
+    const memberName = document.getElementById("qrMemberName").textContent;
+    const memberId = document.getElementById("qrMemberId").textContent;
+
+    if (!qrBox || !qrBox.querySelector("img")) return;
+
+    const qrImage = qrBox.querySelector("img").src;
+    const win = window.open("", "_blank", "width=500,height=650");
+
+    win.document.write(`
+        <!doctype html>
+        <html><head><title>Gym Pro Member QR</title>
+        <style>
+            body{font-family:Arial,sans-serif;text-align:center;padding:40px;}
+            h1{margin-bottom:6px;} img{width:300px;height:300px;margin:25px auto;}
+            .id{font-size:20px;font-weight:bold;}
+        </style></head><body>
+        <h1>GYM PRO</h1>
+        <h2>${memberName}</h2>
+        <div class="id">${memberId}</div>
+        <img src="${qrImage}">
+        <p>Scan at the Gym Pro reception for attendance.</p>
+        </body></html>
+    `);
+
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 300);
 }

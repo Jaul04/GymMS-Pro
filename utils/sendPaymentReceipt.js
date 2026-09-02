@@ -1,159 +1,127 @@
 const axios = require("axios");
+const fs = require("fs");
 
+const sendPaymentReceipt = async (data) => {
 
-const sendPaymentReceipt = async(data)=>{
+    try {
 
-try{
+        // ===========================
+        // PDF to Base64
+        // ===========================
 
+        let attachments = [];
 
-await axios.post(
+        if (data.receiptPath && fs.existsSync(data.receiptPath)) {
 
-"https://api.brevo.com/v3/smtp/email",
+            const file = fs.readFileSync(data.receiptPath);
 
-{
+            attachments.push({
 
-sender:{
+                name: "GymMS_Receipt.pdf",
 
-name:process.env.BREVO_NAME,
+                content: file.toString("base64")
 
-email:process.env.BREVO_EMAIL
+            });
 
-},
+        }
 
+        await axios.post(
 
-to:[
+            "https://api.brevo.com/v3/smtp/email",
 
-{
+            {
 
-email:data.email,
+                sender: {
 
-name:data.name
+                    name: process.env.BREVO_NAME,
 
-}
+                    email: process.env.BREVO_EMAIL
 
-],
+                },
 
+                to: [
 
-subject:
+                    {
 
-"GymMS Pro Payment Receipt",
+                        email: data.email,
 
+                        name: data.name
 
+                    }
 
-htmlContent:
+                ],
 
+                subject: "GymMS Pro Payment Receipt",
 
-`
+                htmlContent: `
 
-<h2>GymMS Pro</h2>
+                <h2>GymMS Pro</h2>
 
+                <h3 style="color:green;">
+                Payment Successful ✅
+                </h3>
 
-<h3 style="color:green;">
-Payment Successful ✅
-</h3>
+                <hr>
 
+                <p><b>Member Name:</b> ${data.name}</p>
 
-<hr>
+                <p><b>Plan:</b> ${data.plan}</p>
 
+                <p><b>Amount:</b> ₹${data.amount}</p>
 
-<p>
-<b>Member Name:</b>
-${data.name}
-</p>
+                <p><b>Payment ID:</b> ${data.transactionId}</p>
 
+                <p><b>Payment Method:</b> Razorpay</p>
 
-<p>
-<b>Plan:</b>
-${data.plan}
-</p>
+                <p><b>Join Date:</b> ${data.joinDate}</p>
 
+                <p><b>Expiry Date:</b> ${data.expiryDate}</p>
 
-<p>
-<b>Amount:</b>
-₹${data.amount}
-</p>
+                <hr>
 
+                <p>
+                Your payment receipt is attached with this email.
+                </p>
 
-<p>
-<b>Payment ID:</b>
-${data.transactionId}
-</p>
+                <p>
+                Thank you for choosing GymMS Pro 💪
+                </p>
 
+                `,
 
-<p>
-<b>Payment Method:</b>
-Razorpay
-</p>
+                attachments: attachments
 
+            },
 
-<p>
-<b>Join Date:</b>
-${data.joinDate}
-</p>
+            {
 
+                headers: {
 
-<p>
-<b>Expiry Date:</b>
-${data.expiryDate}
-</p>
+                    "api-key": process.env.BREVO_API_KEY,
 
+                    "Content-Type": "application/json"
 
-<hr>
+                }
 
+            }
 
-<p>
-Thank you for choosing GymMS Pro 💪
-</p>
+        );
 
-`
+        console.log("✅ Payment Receipt Email Sent");
 
-},
+    }
+    catch (error) {
 
+        console.log(
 
-{
+            "EMAIL ERROR:",
 
-headers:{
+            error.response?.data || error.message
 
-"api-key":
+        );
 
-process.env.BREVO_API_KEY,
-
-
-"Content-Type":
-
-"application/json"
-
-}
-
-}
-
-
-);
-
-
-
-console.log("✅ Payment Receipt Email Sent");
-
-
-}
-
-catch(error){
-
-
-console.log(
-
-"Email Error:",
-
-error.response?.data || error.message
-
-);
-
-
-}
-
+    }
 
 };
-
-
 
 module.exports = sendPaymentReceipt;

@@ -2,118 +2,95 @@ const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema({
 
-    paymentId:{
-
-        type:String,
-
-        unique:true
-
+    // Internal GymMS payment reference.
+    // This field is kept because the existing MongoDB database has
+    // a unique index named paymentId_1.
+    paymentId: {
+        type: String,
+        required: true,
+        unique: true,
+        default: () =>
+            `PAY${Date.now()}${Math.floor(1000 + Math.random() * 9000)}`
     },
 
-    memberId:{
-
-        type:mongoose.Schema.Types.ObjectId,
-
-        ref:"Member"
-
+    // Member Reference
+    memberId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Member",
+        required: false
     },
 
-    memberName:{
-
-        type:String,
-
-        required:true
-
+    // Member Details Snapshot
+    memberName: {
+        type: String,
+        required: true
     },
 
-    memberEmail:{
-
-        type:String,
-
-        required:true
-
+    memberEmail: {
+        type: String
     },
 
-    memberPhone:{
-
-        type:String,
-
-        required:true
-
+    memberPhone: {
+        type: String
     },
 
-    plan:{
-
-        type:String,
-
-        required:true
-
+    // Plan Details
+    plan: {
+        type: String,
+        required: true
     },
 
-    amount:{
-
-        type:Number,
-
-        required:true
-
+    amount: {
+        type: Number,
+        required: true
     },
 
-    paymentDate:{
-
-        type:Date,
-
-        required:true
-
+    // Payment Type
+    paymentMode: {
+        type: String,
+        enum: ["Cash", "UPI", "Card", "Razorpay"],
+        default: "Cash"
     },
 
-    method:{
-
-        type:String,
-
-        enum:[
-            "Cash",
-            "UPI",
-            "Card",
-            "Razorpay"
-        ],
-
-        default:"Cash"
-
+    // Payment Source
+    source: {
+        type: String,
+        enum: ["Offline", "Online"],
+        default: "Offline"
     },
 
-    transactionId:{
-
-        type:String,
-
-        default:""
-
+    // Status
+    paymentStatus: {
+        type: String,
+        enum: ["Pending", "Paid", "Failed"],
+        default: "Pending"
     },
 
-    status:{
+    // Razorpay Details
+    razorpayOrderId: {
+        type: String
+    },
 
-        type:String,
+    razorpayPaymentId: {
+        type: String
+    },
 
-        enum:[
-            "Completed",
-            "Pending",
-            "Failed"
-        ],
+    razorpaySignature: {
+        type: String
+    },
 
-        default:"Completed"
+    // Receipt
+    receiptUrl: {
+        type: String
+    },
 
+    paymentDate: {
+        type: Date,
+        default: Date.now
     }
 
-},
-{
-
-    timestamps:true
-
+}, {
+    timestamps: true
 });
 
-module.exports = mongoose.model(
-
-    "Payment",
-
-    paymentSchema
-
-);
+module.exports = mongoose.model("Payment", paymentSchema);

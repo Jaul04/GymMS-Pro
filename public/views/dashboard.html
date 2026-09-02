@@ -23,6 +23,10 @@ rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <link rel="stylesheet" href="/css/dashboard.css">
+<link rel="stylesheet" href="/css/main.css">
+
+    <link rel="stylesheet" href="/css/main.css?v=final-common">
+    <link rel="stylesheet" href="/css/common.css?v=1">
 
 </head>
 
@@ -32,115 +36,75 @@ rel="stylesheet">
 
 <!-- ================= Sidebar ================= -->
 
+<!-- ================= Sidebar ================= -->
+
 <aside class="sidebar">
 
-<div class="logo">
+    <div class="logo">
+        <i class="fa-solid fa-dumbbell"></i>
+        <span>GymMS Pro</span>
+    </div>
 
-<i class="fa-solid fa-dumbbell"></i>
+    <ul class="menu">
 
-<span>GymMS Pro</span>
+        <li class="active">
+            <a href="/dashboard">
+                <i class="bi bi-grid-fill"></i>
+                Dashboard
+            </a>
+        </li>
 
-</div>
+        <li>
+            <a href="/members">
+                <i class="bi bi-people-fill"></i>
+                Members
+            </a>
+        </li>
 
-<ul class="menu">
+        <li>
+            <a href="/payment-management">
+                <i class="bi bi-wallet2"></i>
+                Payments
+            </a>
+        </li>
 
-<li class="active">
+        <!-- ✅ FIXED -->
+        <li>
+            <a href="/attendance">
+                <i class="bi bi-calendar-check-fill"></i>
+                Attendance
+            </a>
+        </li>
 
-<a href="/dashboard">
+        <li>
+            <a href="/trainer">
+                <i class="bi bi-person-badge-fill"></i>
+                Trainers
+            </a>
+        </li>
 
-<i class="bi bi-grid-fill"></i>
+        <li>
+            <a href="/plans-management">
+                <i class="bi bi-gem"></i>
+                Plans
+            </a>
+        </li>
 
-Dashboard
+        <li>
+            <a href="#">
+                <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                Reports
+            </a>
+        </li>
 
-</a>
+    </ul>
 
-</li>
-
-<li>
-
-<a href="/members">
-
-<i class="bi bi-people-fill"></i>
-
-Members
-
-</a>
-
-</li>
-
-<li>
-
-<a href="/payments">
-
-<i class="bi bi-wallet2"></i>
-
-Payments
-
-</a>
-
-</li>
-
-<li>
-
-<a href="/attendance">
-
-<i class="bi bi-calendar-check-fill"></i>
-
-Attendance
-
-</a>
-
-</li>
-
-<li>
-
-<a href="/trainer">
-
-<i class="bi bi-person-badge-fill"></i>
-
-Trainers
-
-</a>
-
-</li>
-
-<li>
-
-<a href="/plans-management">
-
-<i class="bi bi-gem"></i>
-
-Plans
-
-</a>
-
-</li>
-
-<li>
-
-<a href="#">
-
-<i class="bi bi-file-earmark-bar-graph-fill"></i>
-
-Reports
-
-</a>
-
-</li>
-
-</ul>
-
-<div class="logout">
-
-<a href="/logout">
-
-<i class="bi bi-box-arrow-right"></i>
-
-Logout
-
-</a>
-
-</div>
+    <div class="logout">
+        <a href="/logout">
+            <i class="bi bi-box-arrow-right"></i>
+            Logout
+        </a>
+    </div>
 
 </aside>
 
@@ -720,6 +684,7 @@ Developed by <strong>Jaul Ansar</strong>
 
 <script src="/js/dashboard.js"></script>
 
+<script src="/js/mobile-nav.js?v=1"></script>
 </body>
 
 </html>
