@@ -17,7 +17,12 @@ memberForm.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
+    const photoFile = document.getElementById("profilePhoto")?.files?.[0];
+    if (photoFile && photoFile.size > 5 * 1024 * 1024) { alert("Profile photo must be under 5MB"); return; }
+    const profilePhoto = photoFile ? await fileToDataUrl(photoFile) : undefined;
+
     const member = {
+        profilePhoto,
         name: document.getElementById("name").value,
         email: document.getElementById("email").value,
         phone: document.getElementById("phone").value,
@@ -164,7 +169,7 @@ async function loadMembers() {
 
                     <button
                         class="action-btn view-btn"
-                        onclick="viewMember('${member._id}')">
+                        onclick="viewMemberProfile('${member._id}')">
 
                         <i class="fa-solid fa-eye"></i>
 
@@ -321,62 +326,19 @@ async function editMember(id) {
 // ==========================
 
 async function viewMember(id) {
-
-    try {
-
-        const response = await fetch(`/members/${id}`);
-
-        const data = await response.json();
-
-        const member = data.member;
-
-        if (!member) {
-
-            alert("Member Not Found");
-
-            return;
-
-        }
-
-        const joinDate =
-            new Date(member.joinDate)
-            .toLocaleDateString("en-GB");
-
-        const expiryDate =
-            new Date(member.expiryDate)
-            .toLocaleDateString("en-GB");
-
-        alert(`
-
-🏋 MEMBER DETAILS
-
-ID : ${member.memberId}
-
-Name : ${member.name}
-
-Email : ${member.email}
-
-Phone : ${member.phone}
-
-Plan : ${member.plan}
-
-Status : ${member.status}
-
-Join Date : ${joinDate}
-
-Expiry Date : ${expiryDate}
-
-`);
-
-    }
-
-    catch (error) {
-
-        console.log("View Error:", error);
-
-    }
-
+    return viewMemberProfile(id);
 }
+
+function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+
 // ==========================
 // DELETE MEMBER
 // ==========================
@@ -533,7 +495,7 @@ async function searchMember() {
 
                     <button
                         class="action-btn view-btn"
-                        onclick="viewMember('${member._id}')">
+                        onclick="viewMemberProfile('${member._id}')">
 
                         <i class="fa-solid fa-eye"></i>
 

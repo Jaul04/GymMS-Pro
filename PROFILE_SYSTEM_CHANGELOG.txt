@@ -1,0 +1,39 @@
+GYMMS PRO - PROFILE SYSTEM UPGRADE
+===================================
+
+Implemented in this build:
+
+1. MEMBER PROFILES
+- Profile photo at online registration.
+- Profile photo supported for admin-created members.
+- Member profile data includes photo, bio and trainer assignment field.
+- Admin can click View Profile from Members and inspect complete member details.
+- Profile modal shows personal, membership and payment information.
+
+2. TRAINER PROFILES
+- Trainer photo, gender, DOB, address and bio fields.
+- Trainer list shows profile photo when available.
+- View Profile action opens a detailed trainer profile.
+- Trainer profile includes professional information and assigned members.
+
+3. ADMIN PROFILE
+- New /admin-profile page.
+- Profile photo, name, username, email, phone, DOB, gender, address and bio.
+- Password update.
+- Live statistics for members, trainers and paid members.
+
+4. PHOTO STORAGE
+- Browser image is converted to a data URL and stored as a file under:
+  public/uploads/profiles/
+- MongoDB stores only the public image path.
+- Supported formats: JPG, PNG, WEBP.
+- Maximum photo size: 5MB.
+
+5. SECURITY
+- Profile APIs are protected by the existing auth middleware.
+- Password is never returned in profile responses.
+- Existing .env was intentionally NOT included in the output ZIP.
+
+IMPORTANT
+- Run npm install after extracting/cloning if node_modules is absent.
+- Keep your local .env file private and never commit it to GitHub.

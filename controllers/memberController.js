@@ -40,6 +40,10 @@ const addMember = async (req, res) => {
             emergencyContact:
             req.body.emergencyContact,
 
+            profilePhoto: req.body.profilePhoto || "",
+            bio: req.body.bio || "",
+            trainerId: req.body.trainerId || null,
+
             plan: req.body.plan,
 
             amount: req.body.amount,
@@ -346,6 +350,10 @@ const registerMember = async (req, res) => {
 
             emergencyContact:
             req.body.emergencyContact,
+
+            profilePhoto: req.body.profilePhoto || "",
+            bio: req.body.bio || "",
+            trainerId: req.body.trainerId || null,
 
             plan: req.body.plan,
 

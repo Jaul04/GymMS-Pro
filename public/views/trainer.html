@@ -24,12 +24,13 @@ href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.m
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
 rel="stylesheet">
 
-<link rel="stylesheet" href="/css/dashboard.css">
+
 <link rel="stylesheet" href="/css/main.css">
 
 
     <link rel="stylesheet" href="/css/main.css?v=final-common">
     <link rel="stylesheet" href="/css/common.css?v=1">
+<link rel="stylesheet" href="/css/profile.css">
 
 </head>
 
@@ -133,6 +134,10 @@ Trainers
 
 
 
+
+<li>
+<a href="/admin-profile"><i class="bi bi-person-vcard-fill"></i> Admin Profile</a>
+</li>
 
 <li>
 
@@ -640,6 +645,32 @@ placeholder="Phone">
 
 
 <div class="col-md-6 mb-3">
+<label>Profile Photo</label>
+<input id="profilePhoto" type="file" class="form-control" accept="image/png,image/jpeg,image/webp">
+<small class="text-muted">Optional · max 5MB</small>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Gender</label>
+<select id="gender" class="form-select"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Date of Birth</label>
+<input id="dob" type="date" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Address</label>
+<input id="address" class="form-control" placeholder="Address">
+</div>
+
+<div class="col-12 mb-3">
+<label>Bio</label>
+<textarea id="bio" class="form-control" rows="2" placeholder="Trainer introduction"></textarea>
+</div>
+
+<div class="col-md-6 mb-3">
 
 <label>
 Specialization
@@ -802,6 +833,7 @@ Developed by <strong>Jaul Ansar</strong>
 
 
 
+<script src="/js/profile.js"></script>
 <script src="/js/mobile-nav.js?v=1"></script>
 </body>
 

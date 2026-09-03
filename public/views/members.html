@@ -25,6 +25,7 @@ rel="stylesheet">
 
     <link rel="stylesheet" href="/css/main.css?v=final-common">
     <link rel="stylesheet" href="/css/common.css?v=1">
+<link rel="stylesheet" href="/css/profile.css">
 
 </head>
 
@@ -422,6 +423,12 @@ required>
 </div>
 
 <div class="col-md-6 mb-3">
+<label class="form-label">Profile Photo</label>
+<input type="file" id="profilePhoto" class="form-control" accept="image/png,image/jpeg,image/webp">
+<small class="text-muted">Optional · max 5MB</small>
+</div>
+
+<div class="col-md-6 mb-3">
 
 <label class="form-label">
 
@@ -517,6 +524,8 @@ Save Member
 
 </div>
 
+<!-- Dynamic Member Profile Modal is created by profile.js -->
+
 <!-- QR Code Modal -->
 <div class="modal fade" id="memberQrModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -580,6 +589,7 @@ Developed by <strong>Jaul Ansar</strong>
 
 <script src="/js/members.js"></script>
 
+<script src="/js/profile.js"></script>
 <script src="/js/mobile-nav.js?v=1"></script>
 </body>
 

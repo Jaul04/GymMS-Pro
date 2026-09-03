@@ -31,6 +31,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
 const trainerRoutes = require("./routes/trainerRoutes");
 const planRoutes = require("./routes/planRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 
 // ==========================================
 // APP
@@ -48,7 +49,7 @@ app.use(
     })
 );
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "8mb" }));
 
 // ==========================================
 // STATIC FOLDER
@@ -368,6 +369,15 @@ app.use(
 );
 
 // ==========================================
+// PROFILE SYSTEM
+// ==========================================
+app.use(
+    "/api/profile",
+    authMiddleware,
+    profileRoutes
+);
+
+// ==========================================
 // PLAN API
 // ==========================================
 
@@ -428,56 +438,16 @@ app.get(
 );
 
 // ==========================================================
-// ADMIN PROFILE
+// ADMIN PROFILE PAGE
 // ==========================================================
 
 app.get(
     "/admin-profile",
     authMiddleware,
-    async (req, res) => {
-
-        try {
-
-            const admin =
-                await Admin.findById(
-                    req.session.adminId
-                ).select("-password");
-
-            // --------------------------------------
-            // ADMIN NOT FOUND
-            // --------------------------------------
-
-            if (!admin) {
-
-                return res.json({
-                    success: false,
-                    message: "Admin not found"
-                });
-
-            }
-
-            // --------------------------------------
-            // SUCCESS
-            // --------------------------------------
-
-            res.json({
-                success: true,
-                admin
-            });
-
-        }
-
-        catch (error) {
-
-            console.log(error);
-
-            res.json({
-                success: false,
-                message: "Server Error"
-            });
-
-        }
-
+    (req, res) => {
+        res.sendFile(
+            path.join(__dirname, "public", "views", "admin-profile.html")
+        );
     }
 );
 

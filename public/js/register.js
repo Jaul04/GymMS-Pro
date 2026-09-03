@@ -87,7 +87,18 @@ registerForm.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
+    const photoFile = document.getElementById("profilePhoto")?.files?.[0];
+
+    if (photoFile && photoFile.size > 5 * 1024 * 1024) {
+        alert("Profile photo must be under 5MB.");
+        return;
+    }
+
+    const profilePhoto = photoFile ? await fileToDataUrl(photoFile) : "";
+
     const member = {
+
+        profilePhoto,
 
         name:
         document.getElementById("name").value.trim(),
@@ -216,3 +227,12 @@ registerForm.addEventListener("submit", async (e) => {
     }
 
 });
+
+function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
