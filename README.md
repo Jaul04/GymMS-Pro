@@ -126,10 +126,6 @@ For development with Nodemon, if configured:
 
 npm run dev
 
-Open:
-
-http://localhost:8000
-
 💳 Razorpay
 
 GymMS Pro supports online payments through Razorpay.
@@ -242,6 +238,8 @@ Jaul Ansar
 GitHub: https://github.com/Jaul04
 
 Repository: https://github.com/Jaul04/GymMS-Pro
+
+Live Demo: https://gymms-pro.onrender.com
 
 📄 License
 
